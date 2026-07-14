@@ -1,4 +1,4 @@
 {
-  "codeWorkspace": "C:\\Users\\Szymon\\Desktop\\dealer-platform-docker\\code",
-  "_comment": "Copy to install.config.json (gitignored). Set absolute path to your dealer-platform code/ folder."
+  "codeWorkspace": "C:\\path\\to\\your\\project",
+  "_comment": "Copy to install.config.json (gitignored). Absolute path to your Vue+NestJS workspace root."
 }

@@ -24,7 +24,7 @@ Useful entry points:
 - [Query keys](https://pinia-colada.esm.dev/guide/query-keys.html)
 - [defineQueryOptions](https://pinia-colada.esm.dev/guide/query-options.html)
 
-Prefer documented Colada patterns over ad-hoc caching in Pinia stores. If the docs and this repo diverge, follow **this project's conventions** below and align with `vehicle-configurator.queries.ts`.
+Prefer documented Colada patterns over ad-hoc caching in Pinia stores. If the docs and this repo diverge, follow **this project's conventions** below and align with your Colada reference in `ui/src/queries/` (see [reference.md](../skills/platform-agents/reference.md)).
 
 ## When to use Colada vs Pinia stores
 
@@ -44,14 +44,14 @@ Prefer documented Colada patterns over ad-hoc caching in Pinia stores. If the do
 | `ui/src/queries/index.ts`            | Barrel exports                            |
 | `ui/src/api/{domain}.api.ts`         | Thin HTTP functions used by queries       |
 
-Reference implementation: `vehicle-configurator.queries.ts` + `vehicle-configurator.api.ts`.
+Reference implementation: `queries/{domain}.queries.ts` + `api/{domain}.api.ts` in your workspace.
 
 ## Naming (project convention)
 
 | Item                 | Pattern                        | Example                                |
 | -------------------- | ------------------------------ | -------------------------------------- |
-| Query file           | `{domain}.queries.ts`          | `vehicle-configurator.queries.ts`      |
-| API helper file      | `{domain}.api.ts`              | `vehicle-configurator.api.ts`          |
+| Query file           | `{domain}.queries.ts`          | `product.queries.ts`                 |
+| API helper file      | `{domain}.api.ts`              | `product.api.ts`                     |
 | Key factory          | `{DOMAIN}_KEYS`                | `VEHICLE_CONFIGURATOR_KEYS`            |
 | Query options export | `{domain}{Resource}` camelCase | `vehicleConfiguratorRegulatedProducts` |
 

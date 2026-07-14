@@ -1,6 +1,6 @@
 ---
 name: pinia-architect
-description: Designs Pinia setup stores for domain and UI state, actions, getters, and store composition. Use when modeling selections, modals, enquiry state, store-only changes, or fixing store/action bugs — not for new read caches (use pinia-colada-expert).
+description: Designs Pinia setup stores for domain and UI state, actions, getters, and store composition. Use when modeling selections, modals, domain hub state, store-only changes, or fixing store/action bugs — not for new read caches (use pinia-colada-expert).
 ---
 
 # Pinia Architect
@@ -27,7 +27,7 @@ Ask questions first.
 | Mutations, POST/PATCH flows             | Shared lists/options keyed by request params  |
 | Loader/dialog flags (`loader.store`)    | Multiple components need the same cached read |
 
-Example: `selectedEnquiry` + `setSelectedEnquiry()` → Pinia; funded product options → Colada.
+Example: `selectedEntity` + `setSelectedEntity()` → Pinia; shared options list keyed by params → Colada.
 
 Do not migrate legacy store domains to Colada unless explicitly asked.
 
@@ -35,9 +35,8 @@ Do not migrate legacy store domains to Colada unless explicitly asked.
 
 ```
 ui/src/stores/
-  enquiry.store.ts          # domain: selectedEnquiry, enquiries, activeVehicle
-  loader.store.ts           # global UI: show/hide loader
-  vehicle-configurator.store.ts
+  {domain}.store.ts         # e.g. selected entity, list cache, wizard state
+  loader.store.ts           # global UI loader
   index.ts                  # barrel re-exports
 ```
 
@@ -45,10 +44,10 @@ ui/src/stores/
 
 | Item     | Pattern             | Example                                                  |
 | -------- | ------------------- | -------------------------------------------------------- |
-| File     | `{domain}.store.ts` | `enquiry.store.ts`                                       |
-| Export   | `use{Domain}Store`  | `useEnquiryStore`                                        |
-| Store id | kebab-case          | `'enquiry'`, `'finance-calculator'`                      |
-| Actions  | verbs               | `setSelectedEnquiry`, `setIsUpdate`, `clearSelectedTask` |
+| File     | `{domain}.store.ts` | `customer.store.ts`                                      |
+| Export   | `use{Domain}Store`  | `useCustomerStore`                                       |
+| Store id | kebab-case          | `'customer'`, `'my-feature'`                             |
+| Actions  | verbs               | `setSelectedCustomer`, `clearSelection`, `resetWizard`   |
 
 ## Setup store template
 

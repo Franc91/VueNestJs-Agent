@@ -10,4 +10,4 @@ Orchestrates **Vue `ui/` + NestJS `/uiapi/`** — workflows, handoffs, and proje
 | [reference.md](reference.md) | Monorepo layout, layers, reference implementations |
 | [examples.md](examples.md) | Walkthrough examples |
 
-Routing: [specialists/decision.md](../../specialists/decision.md) · Index: [AGENTS.md](../../../AGENTS.md).
+Routing: [specialists/routing.md](../../specialists/routing.md) · Index: [AGENTS.md](../../../AGENTS.md).

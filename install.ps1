@@ -48,7 +48,7 @@ Pop-Location
 
 if ($exit -eq 0) {
     Write-Host ""
-    Write-Host "Done. Open code/ in Cursor -> AGENTS.md or .cursor/specialists/decision.md"
+    Write-Host "Done. Open code/ in Cursor -> AGENTS.md or .cursor/specialists/routing.md"
 } else {
     Write-Host "Install finished with validation errors." -ForegroundColor Red
 }

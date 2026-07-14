@@ -35,7 +35,7 @@ Location: `ui/src/components/DataGrid/`, `TreeDataGrid/`, `DataGridWithTotals/`.
 - **Metadata URL:** **`UiApiGridUrlPathEnum`** from `ui/src/enums/api.enum.ts` — GET `/uiapi/grids/...`
 - **Data URL:** **`UiApiUrlPathEnum`** — usually `POST .../search` on the domain endpoint
 - Do not hardcode `uiapi/grids/...` strings — use enums (legacy views may have hardcoded paths; do not copy that pattern)
-- **`fixedConditions`** — scope grid to dealership, enquiry, etc. (`FixedConditionInterface[]`)
+- **`fixedConditions`** — scope grid to parent entity, dealership, etc. (`FixedConditionInterface[]`)
 - **`defaultQueue`** — selects initial filter set when metadata defines queues (e.g. `'Customer'`)
 - **`headers-auto-parser-mapping`** — common on list screens; match neighbours
 - Row/header actions: **`actions`**, **`buttonActions`** — use `uuidv4()` for `key` like existing lists

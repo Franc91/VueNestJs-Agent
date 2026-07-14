@@ -1,6 +1,6 @@
 # Onboarding — 3 steps
 
-For **Dealer Platform** (`dealer-platform-docker/code/`). Agent bundle: **`Desktop/VueNestJs Agent/`**.
+For any **Vue 3 + NestJS** monorepo. Agent bundle: **`VueNestJs Agent/`** (e.g. on Desktop).
 
 ## Step 1 — Config
 
@@ -9,11 +9,11 @@ cd "$env:USERPROFILE\Desktop\VueNestJs Agent"
 Copy-Item install.config.example.json install.config.json
 ```
 
-Edit `install.config.json` — path to **your** `code/` folder:
+Edit `install.config.json` — absolute path to **your** app workspace (git root or `code/` folder):
 
 ```json
 {
-  "codeWorkspace": "C:\\Users\\Szymon\\Desktop\\dealer-platform-docker\\code"
+  "codeWorkspace": "C:\\path\\to\\your\\project"
 }
 ```
 
@@ -23,18 +23,20 @@ Edit `install.config.json` — path to **your** `code/` folder:
 .\install.ps1 -InstallSupplementary
 ```
 
-Copies `.cursor/`, `AGENTS.md`, and `skills-lock.json` into `code/` and installs 9 supplementary skills.
+Copies `.cursor/`, `AGENTS.md`, and `skills-lock.json` into the target workspace and installs supplementary skills.
 
-## Step 3 — Verify & use
+## Step 3 — Verify & customize
 
 ```powershell
 .\doctor.ps1
 ```
 
-Open **`code/`** in Cursor (not parent docker folder). Start at:
+Open the **target workspace** in Cursor (the folder set in `codeWorkspace`). Start at:
 
 - [AGENTS.md](AGENTS.md) or
-- [.cursor/specialists/decision.md](.cursor/specialists/decision.md)
+- [.cursor/specialists/routing.md](.cursor/specialists/routing.md)
+
+Then align [stack-profile.md](.cursor/stack-profile.md) and [reference.md](.cursor/skills/platform-agents/reference.md) with your repo layout.
 
 ---
 
@@ -54,10 +56,11 @@ Open **`code/`** in Cursor (not parent docker folder). Start at:
 | `Target path not found` | Fix `codeWorkspace` (use `\\` on Windows) |
 | Supplementary check fails | `.\install.ps1 -InstallSupplementary` |
 | Lost MCP config | `mcp.json` preserved on reinstall — else copy from `mcp.example.json` |
-| Old copy under `dealer-platform-docker\dealer-platform-cursor` | `.\cleanup-legacy.ps1` |
+| Old nested bundle copy | `.\cleanup-legacy.ps1` |
 
 ## Give to another dev
 
-1. Share this repo (zip or git clone).
+1. Share this bundle (zip or git clone).
 2. They complete Steps 1–3 with **their** `codeWorkspace` path.
-3. Optional: own `mcp.example.json` → `code/.cursor/mcp.json`.
+3. They customize `stack-profile.md` / `reference.md` for their stack.
+4. Optional: own `mcp.example.json` → `{workspace}/.cursor/mcp.json`.

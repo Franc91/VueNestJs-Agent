@@ -49,4 +49,4 @@ if $INSTALL_SUPP; then
 fi
 
 (cd "$TARGET" && node .cursor/scripts/validate-agent-links.mjs)
-echo "Done. Open code/ in Cursor -> AGENTS.md or .cursor/specialists/decision.md"
+echo "Done. Open code/ in Cursor -> AGENTS.md or .cursor/specialists/routing.md"

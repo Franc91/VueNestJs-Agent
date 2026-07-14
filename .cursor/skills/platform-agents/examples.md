@@ -1,183 +1,92 @@
-# End-to-end examples — Dealer Platform
+# End-to-end examples — Vue + NestJS monorepo
 
-Canonical conventions: `.cursor/rules/general.mdc`, `vue.mdc`, `pinia-stores.mdc`, `pinia-colada.mdc`, `services.mdc`, `nestjs.mdc`, `data-grid.mdc`, `i18n.mdc`.
-**New work** uses the patterns below (Colada, VueUse, typed setup) — not legacy store+watch copies from older domains.
+Generic patterns from `.cursor/rules/`. Replace `{domain}`, `{Feature}`, `{Entity}` with your modules.
 
-Workflow for **new cached reads**: pinia-colada-expert → vue-component-creator → platform-review-agent
-Workflow for **existing domains**: pinia-architect (if store changes) → vue-component-creator → platform-review-agent
-Workflow for **new screen + API**: nestjs-api-agent → vue-router-agent (if new route) → vue-component-creator → platform-review-agent
+**New cached reads:** pinia-colada-expert → vue-component-creator → platform-review-agent  
+**Store changes:** pinia-architect → vue-component-creator → platform-review-agent  
+**New screen + API:** nestjs-api-agent → vue-router-agent (if route) → vue-component-creator → platform-review-agent
 
 ---
 
-## 1. Colada — vehicle configurator product options (actual pattern)
-
-Reference implementation in the repo:
-
-- `ui/src/api/vehicle-configurator.api.ts` — HTTP
-- `ui/src/queries/vehicle-configurator.queries.ts` — keys + `defineQueryOptions`
-- `ui/src/views/CustomerOffer/sections/SupplementaryProductsSection/` — `useQuery` consumer
+## 1. Colada — cached product/options read
 
 ```ts
-// ui/src/queries/vehicle-configurator.queries.ts
+// ui/src/queries/{domain}.queries.ts
 import { defineQueryOptions } from '@pinia/colada';
-import { getFundedRegulatedProductOptions } from '@/api';
+import { getItems } from '@/api';
 
-export const VEHICLE_CONFIGURATOR_KEYS = {
-  root: ['vehicle-configurator'] as const,
-  regulatedProducts: (payload: Payload) =>
-    [...VEHICLE_CONFIGURATOR_KEYS.root, 'regulated-products', payload.derivativeId] as const,
+export const DOMAIN_KEYS = {
+  root: ['my-domain'] as const,
+  items: (payload: Payload) => [...DOMAIN_KEYS.root, 'items', payload.id ?? ''] as const,
 };
 
-export const vehicleConfiguratorRegulatedProducts = defineQueryOptions((payload: Payload) => ({
-  key: VEHICLE_CONFIGURATOR_KEYS.regulatedProducts(payload),
-  enabled: Boolean(payload?.derivativeId && payload?.manufacturerId),
-  query: async () => getFundedRegulatedProductOptions(payload),
+export const myDomainItems = defineQueryOptions((payload: Payload) => ({
+  key: DOMAIN_KEYS.items(payload),
+  enabled: Boolean(payload?.id),
+  query: async () => getItems(payload),
 }));
 ```
 
 ```vue
-<!-- Consumer — match SupplementaryProductsSection.vue -->
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useQuery } from '@pinia/colada';
-import { vehicleConfiguratorRegulatedProducts } from '@/queries';
+import { myDomainItems } from '@/queries';
 
 const props = defineProps<{ payload: Payload }>();
-
-const productsPayload = computed(() => props.payload);
-
-const regulatedProducts = useQuery(() => vehicleConfiguratorRegulatedProducts(productsPayload.value));
-// regulatedProducts.data, .isPending, .error, .refresh
+const payload = computed(() => props.payload);
+const items = useQuery(() => myDomainItems(payload.value));
 </script>
 ```
 
+Point agents to **your** Colada reference files in [reference.md](reference.md).
+
 ---
 
-## 2. Pinia + service — enquiry domain (legacy norm)
+## 2. Pinia + service — domain selection (legacy norm)
 
 ```ts
-// ui/src/stores/enquiry.store.ts (simplified)
+// ui/src/stores/{domain}.store.ts
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { EnquiryService } from '@/services';
+import { MyDomainService } from '@/services';
 
-export const useEnquiryStore = defineStore('enquiry', () => {
-  const selectedEnquiry = ref<EnquiryInterface>();
+export const useMyDomainStore = defineStore('my-domain', () => {
+  const selected = ref<EntityInterface>();
 
-  async function setSelectedEnquiry(enquiryId?: string) {
-    selectedEnquiry.value = enquiryId ? await EnquiryService.getEnquiry(enquiryId) : undefined;
+  async function setSelected(id?: string) {
+    selected.value = id ? await MyDomainService.get(id) : undefined;
   }
 
-  return { selectedEnquiry, setSelectedEnquiry };
+  return { selected, setSelected };
 });
 ```
 
-```vue
-<!-- ui/src/views/enquiry/AddEditEnquiry/QuotedVehicleModal/QuotedVehicleModal.vue -->
-<script setup lang="ts">
-const selectedEnquiry = ref<EnquiryInterface>();
-const isWhatNextAction = ref(false);
-
-const open = ({ type, enquiry, isWhatNext = false }: OpenParams) => {
-  selectedEnquiry.value = enquiry;
-  isWhatNextAction.value = isWhatNext;
-  quotedVehicleModalType.value = type;
-  isOpen.value = true;
-};
-
-defineExpose({ open, isOpen });
-</script>
-```
-
-Pass props through the chain:
-
-```vue
-<!-- QuotedVehicleModal → VehicleStock → VehicleStockFilters -->
-<VehicleStock is-dialog :is-what-next-action="isWhatNextAction" />
-<VehicleStockFilters :is-what-next-action="isWhatNextAction" />
-```
-
 ---
 
-## 3. Component — filters with MOI prefill
+## 3. Vue Router — new menu route
 
 ```ts
-// ui/src/views/vehicle/VehicleStockFilters/constants.ts
-export const MOI_FILTER_FIELDS = {
-  make: 'manufacturerName',
-  model: 'longModel',
-  purchaseTypeCode: 'purchaseTypeCode',
-} as const;
-```
-
-```ts
-const applyMoiFilters = (): boolean => {
-  const moi = selectedEnquiry.value?.moi;
-  if (!isWhatNextAction || !moi) return false;
-
-  return Object.entries(MOI_FILTER_FIELDS).some(([moiKey, fieldName]) =>
-    setMoiFilterValue(fieldName, moi[moiKey as keyof typeof MOI_FILTER_FIELDS]),
-  );
-};
-```
-
----
-
-## 4. Vue Review — expected checks
-
-| Check                                                               | Pass                           |
-| ------------------------------------------------------------------- | ------------------------------ |
-| HTTP via `EnquiryService`, not Axios in view                        | ✅                             |
-| `isWhatNextAction` declared in `VehicleStock` props and passed down | ✅                             |
-| i18n keys added to `src/global/locales/en/`                         | ✅                             |
-| Vuetify fields match neighbouring styling (`underlined`, `#48a0cc`) | ✅                             |
-| VueUse used instead of manual `addEventListener` in new code        | ✅                             |
-| Ref/param name shadowing in `open()`                                | ❌ — use `selectedEnquiry` ref |
-
----
-
-## 5. Vue Router — add menu route + navigation (actual pattern)
-
-Reference implementation in the repo:
-
-- `ui/src/enums/router.enum.ts` — `RouterName`, `RouterPathEnum`
-- `ui/src/config/configPath.ts` — menu + lazy route component
-- `ui/src/router/index.ts` — global guards, `meta.roleAttributes`
-- `ui/src/views/diary/Diary.vue` — `useRouter` / `useRoute` consumption
-
-```ts
-// ui/src/enums/router.enum.ts (add entries)
+// enums/router.enum.ts
 enum RouterName {
   MY_FEATURE = 'My Feature',
 }
 enum RouterPathEnum {
-  MY_FEATURE = `${RouterPathBaseEnum.ADMIN}my-feature`,
+  MY_FEATURE = `${RouterPathBaseEnum.APP}my-feature`,
 }
 ```
 
 ```ts
-// ui/src/config/configPath.ts (child under main layout)
+// configPath or router module — lazy import
 {
-  global: {
-    name: RouterName.MY_FEATURE,
-    path: RouterPathEnum.MY_FEATURE,
-    meta: {
-      roleAttributes: [ApplicationAttributeCodeEnum.SOME_PERMISSION],
-      options: { all: false },
-    },
-  },
-  route: {
-    component: () => import('@/views/admin/MyFeature/MyFeature.vue'),
-  },
-  verticalMenu: { title: t('pages.myFeature'), icon: markRaw(SomeIcon), show: true },
+  name: RouterName.MY_FEATURE,
+  path: RouterPathEnum.MY_FEATURE,
+  component: () => import('@/views/MyFeature/MyFeature.vue'),
+  meta: { /* permissions */ },
 }
 ```
 
 ```ts
-// Navigation from a component
-import { useRouter } from 'vue-router';
-import { RouterName } from '@/enums';
-
 const router = useRouter();
 router.push({ name: RouterName.MY_FEATURE, params: { id } });
 ```
@@ -186,25 +95,18 @@ Workflow: **vue-router-agent** → **vue-component-creator** → **platform-revi
 
 ---
 
-## 6. Backend + frontend — new search endpoint
+## 4. Backend + frontend — search endpoint
 
 ```ts
-// src/ui-api/note/note.controller.ts (pattern)
-@UseGuards(CognitoAuthGuard)
+// src/ui-api/note/note.controller.ts
+@UseGuards(AuthGuard)
 @Controller('/uiapi/note')
 export default class NoteController {
   @Post('/search')
   @HttpCode(200)
-  public async search(@Body() params: FilterParams): Promise<SearchResponse<Note>> {
-    return await this.noteService.search(params);
+  async search(@Body() params: FilterParams) {
+    return this.noteService.search(params);
   }
-}
-```
-
-```ts
-// ui/src/enums/api.enum.ts
-export enum UiApiUrlPathEnum {
-  NOTE_SEARCH = `${ApiBaseUrl.NOTE}search`,
 }
 ```
 
@@ -223,74 +125,42 @@ export class NoteService {
 }
 ```
 
-Workflow: **nestjs-api-agent** → **vue-component-creator** (or **pinia-colada-expert** for cached reads)
-
 ---
 
-## 7. Performance — common issues
-
-| Issue                                                        | Fix                                     |
-| ------------------------------------------------------------ | --------------------------------------- |
-| `watch([metaData, moi], …)` only uses `metaData` in callback | Destructure all deps or split watchers  |
-| `setMoiFilterValue` chained with `\|\|`                      | Use `some()` — apply all MOI fields     |
-| `useDictionaryStore()` inside `computed` per chip            | Precompute or memoize dictionary lookup |
-| `console.log` in `visibleChips` computed                     | Remove before merge                     |
-
----
-
-## 8. DataGrid — list screen + metadata (actual pattern)
-
-Reference:
-
-- `ui/src/views/Admin/FieldSetManagment/FieldSetManagmentList/FieldSetManagmentList.vue` — flat `DataGrid`
-- `ui/src/views/Customers/CustomerList/CustomerList.vue` — `TreeDataGrid` with child rows
-- `src/domain/grid/metadata/customer.metadata.ts` — columns, filterSets
-- `src/ui-api/grids/grids.controller.ts` — GET metadata endpoints
+## 5. DataGrid — list + metadata
 
 ```vue
 <DataGrid
-  :api-metadata-url="UiApiGridUrlPathEnum.GRID_FIELD_SET"
-  :api-data-url="UiApiUrlPathEnum.FIELD_SET_SEARCH"
+  :api-metadata-url="UiApiGridUrlPathEnum.GRID_MY_ENTITY"
+  :api-data-url="UiApiUrlPathEnum.MY_ENTITY_SEARCH"
   headers-auto-parser-mapping
-  :table-label="t('item.itemList', { name: t('fieldSet') })"
+  :table-label="t('item.itemList', { name: t('myEntity') })"
 />
 ```
+
+Backend: `src/domain/grid/metadata/my-entity.metadata.ts`
 
 Workflow: **data-grid-agent** → **vue-router-agent** (if new route) → **platform-review-agent**
 
 ---
 
-## 9. i18n — add keys for a new feature
+## 6. i18n — new feature keys
 
 ```ts
-// src/global/locales/en/my-feature.ts
+// src/global/locales/en/my-feature.ts (or your locale root)
 export const myFeature = {
   label: 'My Feature | My Features',
-  description: 'Description text',
 };
 ```
 
-```ts
-// src/global/locales/en/index.ts — import and spread
-import { myFeature } from './my-feature';
+Register in locale `index.ts`. Use `useI18n<{ message: MessageSchema }>({ useScope: 'global' })` or project shorthand.
 
-export const en = {
-  // ...
-  ...myFeature,
-};
-```
+---
 
-```vue
-<script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import type { MessageSchema } from '@/plugins/i18n';
+## 7. Performance — common issues
 
-const { t } = useI18n<{ message: MessageSchema }>({ useScope: 'global' });
-</script>
-
-<template>
-  <span>{{ t('label') }}</span>
-</template>
-```
-
-Use existing shared keys first: `actions.save`, `errors.fieldIsRequired`, `crudItem.createItem`.
+| Issue | Fix |
+| ----- | --- |
+| `watch` deps not all used in callback | Destructure or split watchers |
+| Dictionary store inside tight computed loops | Precompute / memoize |
+| `console.log` in computed getters | Remove before merge |

@@ -1,10 +1,10 @@
 # VueNestJs Agent
 
-Cursor agent setup for **Dealer Platform** (Vue 3 + NestJS full-stack). Installs into `dealer-platform-docker/code/` locally — **not** part of the application git repo.
+Cursor agent setup for **Vue 3 + NestJS full-stack monorepos** (`ui/` + `src/`, `/uiapi/` BFF). Installs into your app workspace — **not** part of the application git repo.
 
 **Version:** [VERSION](VERSION) · **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 
-**Location:** `Desktop/VueNestJs Agent/`
+**Location:** e.g. `Desktop/VueNestJs Agent/`
 
 ## Quick start
 
@@ -13,7 +13,7 @@ Cursor agent setup for **Dealer Platform** (Vue 3 + NestJS full-stack). Installs
 ```powershell
 cd "$env:USERPROFILE\Desktop\VueNestJs Agent"
 Copy-Item install.config.example.json install.config.json
-# edit codeWorkspace
+# edit codeWorkspace → path to your repo root (or monorepo code/ folder)
 .\install.ps1 -InstallSupplementary
 .\doctor.ps1
 ```
@@ -22,11 +22,11 @@ Copy-Item install.config.example.json install.config.json
 
 | Script | Description |
 | ------ | ------------- |
-| `install.ps1` | Install into `code/` (preserves `mcp.json`) |
+| `install.ps1` | Install into target workspace (preserves `mcp.json`) |
 | `install.ps1 -InstallSupplementary` | + supplementary skills |
 | `doctor.ps1` | Health check + link validator |
 | `update.ps1` | `git pull` + reinstall |
-| `cleanup-legacy.ps1` | Remove old copy under `dealer-platform-docker/` |
+| `cleanup-legacy.ps1` | Remove old nested bundle copy (if you migrated layout) |
 
 Linux / macOS: `install.sh`, `doctor.sh`, `update.sh`
 
@@ -36,19 +36,32 @@ Linux / macOS: `install.sh`, `doctor.sh`, `update.sh`
 
 ```json
 {
-  "codeWorkspace": "C:\\Users\\Szymon\\Desktop\\dealer-platform-docker\\code"
+  "codeWorkspace": "C:\\path\\to\\your\\project"
 }
 ```
 
-## Installed into `code/`
+## Installed into target workspace
 
 | Source | Destination |
 | ------ | ----------- |
-| `.cursor/` | `code/.cursor/` |
-| `AGENTS.md` | `code/AGENTS.md` |
-| `skills-lock.json` | `code/skills-lock.json` |
+| `.cursor/` | `{codeWorkspace}/.cursor/` |
+| `AGENTS.md` | `{codeWorkspace}/AGENTS.md` |
+| `skills-lock.json` | `{codeWorkspace}/skills-lock.json` |
 
-`ONBOARDING.md` stays in the bundle repo only — not copied into `code/`.
+`ONBOARDING.md` stays in the bundle repo only — not copied into the app repo.
+
+## Customize for your project
+
+After install, edit in **your** workspace (overwritten on `update.ps1` — keep customizations in bundle or re-apply):
+
+| File | Purpose |
+| ---- | ------- |
+| [`.cursor/stack-profile.md`](.cursor/stack-profile.md) | Your stack (UI lib, ORM, auth, deployment) |
+| [`.cursor/skills/platform-agents/reference.md`](.cursor/skills/platform-agents/reference.md) | Layout paths, reference implementations |
+
+## Optional: private project notes
+
+[docs/agent/index.example.md](docs/agent/index.example.md) — template for **local** domain notes. Copy manually to `{workspace}/docs/agent/index.md`; add `docs/agent/` to project `.gitignore` if private. Not installed, not routed by agent.
 
 ## Publish (optional git remote)
 
@@ -61,4 +74,4 @@ Share repo → recipient follows [ONBOARDING.md](ONBOARDING.md).
 
 ## Using agents
 
-Open `code/` in Cursor → [AGENTS.md](AGENTS.md) or [.cursor/specialists/decision.md](.cursor/specialists/decision.md).
+Open your workspace in Cursor → [AGENTS.md](AGENTS.md) or [.cursor/specialists/routing.md](.cursor/specialists/routing.md).

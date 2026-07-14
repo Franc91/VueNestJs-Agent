@@ -1,6 +1,6 @@
 ---
 name: platform-agents
-description: Orchestrates Dealer Platform full-stack work (Vue ui/ + NestJS /uiapi/) — picks workflows, specialized skills in order, and handoffs. Use when planning or implementing any screen, list, form, store, Colada query, backend endpoint, bugfix, refactor, or multi-step task in code/ui or code/src.
+description: Orchestrates Vue + NestJS full-stack monorepo work (ui/ + /uiapi/) — picks workflows, specialized skills in order, and handoffs. Use when planning or implementing any screen, list, form, store, Colada query, backend endpoint, bugfix, refactor, or multi-step task in ui/ or src/.
 disable-model-invocation: true
 ---
 
@@ -50,7 +50,7 @@ Skills implement workflow; **rules define conventions**. When in doubt, read the
 Every agent must follow **current** conventions from `.cursor/rules/` — not legacy code copied from old domains.
 
 - New features → newest layer for the job (Colada for reads, VueUse for DOM, `defineModel`, typed setup stores).
-- Reference implementations beat ad-hoc legacy: `vehicle-configurator.queries.ts`, `SupplementaryProductsSection.vue`.
+- Reference implementations in **your** repo (see [reference.md](reference.md)) beat ad-hoc legacy patterns.
 - When rules and neighbouring legacy code conflict on **new** code, rules win. Ask before widening scope to refactor legacy.
 
 ## Rule

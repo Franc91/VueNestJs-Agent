@@ -26,7 +26,7 @@ Test-Check "install.config.json exists" (Test-Path (Join-Path $Root "install.con
 Test-Check "code workspace exists" (Test-Path $code) "Fix codeWorkspace in install.config.json"
 Test-Check "AGENTS.md installed" (Test-Path (Join-Path $code "AGENTS.md")) "Run .\install.ps1"
 Test-Check ".cursor/ installed" (Test-Path (Join-Path $code ".cursor\rules\general.mdc")) "Run .\install.ps1"
-Test-Check "decision.md present" (Test-Path (Join-Path $code ".cursor\specialists\decision.md")) "Run .\install.ps1"
+Test-Check "routing.md present" (Test-Path (Join-Path $code ".cursor\specialists\routing.md")) "Run .\install.ps1"
 Test-Check "skills-lock.json installed" (Test-Path (Join-Path $code "skills-lock.json")) "Run .\install.ps1"
 
 $agentsDir = Join-Path $code ".agents\skills"

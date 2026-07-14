@@ -1,6 +1,6 @@
 # Cursor domain skills
 
-Project-specific agents under `.cursor/skills/`. Index: [AGENTS.md](../../AGENTS.md) · routing: [specialists/decision.md](../specialists/decision.md).
+Project-specific agents under `.cursor/skills/`. Index: [AGENTS.md](../../AGENTS.md) · routing: [specialists/routing.md](../specialists/routing.md).
 
 ## Domain agents (implement code)
 

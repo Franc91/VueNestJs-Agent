@@ -1,6 +1,6 @@
-# Stack profile — Dealer Platform
+# Stack profile — your project
 
-Project-wide **frontend** and **backend** stack definitions. Governs which supplementary skill references (`.agents/skills/`) are active.
+Default template for a **Vue 3 + NestJS** monorepo. **Edit after install** to match your app workspace.
 
 **Not** part of `platform-agents` — applies to all agents (`vue-component-creator`, `nestjs-api-agent`, etc.).
 
@@ -66,7 +66,7 @@ Do **not** apply these unless the table above is updated after a migration:
 | **Domain layer** | `src/domain/{domain}/`                | Business logic in `*.service.ts`                                  |
 | **Auth**         | AWS Cognito                           | `CognitoAuthGuard`, `@Session() { user }` — not custom JWT module |
 | **Validation**   | `class-validator` + `ValidationGroup` | DTOs in `src/ui-api/{domain}/dto/`                                |
-| **Deployment**   | Docker Compose monolith               | Parent repo `dealer-platform-docker/` — not K8s microservices     |
+| **Deployment**   | Docker Compose (typical)              | Or bare metal / K8s — update this row for your setup            |
 
 ### Supplementary skills — active rule categories
 

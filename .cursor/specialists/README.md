@@ -28,7 +28,7 @@ Full-stack — Vue, NestJS, TypeScript, Pinia, Vue Router, Colada, DataGrid.
 
 | Topic | File |
 | ----- | ---- |
-| **Intent → which doc** (read first when unsure) | [decision.md](decision.md) |
+| **Intent → which doc** (read first when unsure) | [routing.md](routing.md) |
 | Vue tier (Simple / Standard / Substantial) | [vue-tier.md](vue-tier.md) |
 | Backend tier (Simple / Standard / Substantial) | [backend-tier.md](backend-tier.md) |
 | Domain agent → supplementary map | [by-agent.md](by-agent.md) |

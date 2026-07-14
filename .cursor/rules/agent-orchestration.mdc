@@ -1,5 +1,5 @@
 ---
-description: Multi-step Dealer Platform work — new screen, API+UI, store, Colada, grid, cross-layer bugfix. Chain domain agents via workflows.md. Polish — nowy ekran, endpoint, napraw błąd, store, lista.
+description: Multi-step Vue + NestJS monorepo work — new screen, API+UI, store, Colada, grid, cross-layer bugfix. Chain domain agents via workflows.md. Polish — nowy ekran, endpoint, napraw błąd, store, lista.
 alwaysApply: false
 ---
 

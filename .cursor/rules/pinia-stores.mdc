@@ -31,9 +31,9 @@ Prefer documented Pinia patterns over ad-hoc workarounds. If the docs and this r
 
 | Item     | Pattern             | Example                             |
 | -------- | ------------------- | ----------------------------------- |
-| File     | `{domain}.store.ts` | `enquiry.store.ts`                  |
-| Export   | `use{Domain}Store`  | `useEnquiryStore`                   |
-| Store id | kebab-case          | `'enquiry'`, `'finance-calculator'` |
+| File     | `{domain}.store.ts` | `customer.store.ts`                 |
+| Export   | `use{Domain}Store`  | `useCustomerStore`                  |
+| Store id | kebab-case          | `'customer'`, `'my-feature'`      |
 
 ## Style
 
@@ -42,23 +42,23 @@ Setup stores only: `defineStore('id', () => { ref, computed, functions, return }
 ```ts
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { EnquiryService } from '@/services';
+import { CustomerService } from '@/services';
 
-export const useEnquiryStore = defineStore('enquiry', () => {
-  const selectedEnquiry = ref<EnquiryInterface>();
+export const useCustomerStore = defineStore('customer', () => {
+  const selectedCustomer = ref<CustomerInterface>();
   const isUpdate = ref(false);
 
-  const hasSelectedEnquiry = computed(() => Boolean(selectedEnquiry.value?.id));
+  const hasSelected = computed(() => Boolean(selectedCustomer.value?.id));
 
-  async function setSelectedEnquiry(enquiryId?: string) {
-    // call EnquiryService / domain helpers
+  async function setSelectedCustomer(customerId?: string) {
+    // call CustomerService / domain helpers
   }
 
   function setIsUpdate() {
     isUpdate.value = !isUpdate.value;
   }
 
-  return { selectedEnquiry, isUpdate, hasSelectedEnquiry, setSelectedEnquiry, setIsUpdate };
+  return { selectedCustomer, isUpdate, hasSelected, setSelectedCustomer, setIsUpdate };
 });
 ```
 

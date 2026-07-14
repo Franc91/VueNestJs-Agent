@@ -7,17 +7,6 @@ alwaysApply: true
 
 ## Monorepo layout
 
-```
-dealer-platform-docker/          # Docker repo (parent)
-├── docker-compose.yml           # nestjs + frontend + postgres
-├── docker/
-└── code/                        # Git root (this workspace)
-    ├── ui/                      # Vue 3 + Vite + TypeScript + Vuetify
-    ├── src/                     # NestJS 11 + TypeORM backend
-    ├── env/                     # .env.development, .env.test, …
-    └── nest-cli.json
-```
-
 | Path   | Stack                       | Role        |
 | ------ | --------------------------- | ----------- |
 | `ui/`  | Vue 3, Vite, Pinia, Vuetify | Frontend    |
@@ -25,9 +14,10 @@ dealer-platform-docker/          # Docker repo (parent)
 
 - Path alias: `@/` → `ui/src/`
 - Frontend REST: **`/uiapi/`** (Vite proxy → NestJS `:3000`)
-- URL paths: `ui/src/enums/api.enum.ts` (`UiApiUrlPathEnum`, `ApiBaseUrl`)
-- App routes: `ui/src/enums/router.enum.ts` (`RouterName`, `RouterPathEnum`, `RouterPathBaseEnum`)
-- Locales: **`src/global/locales/`** (shared) — wired via `ui/src/plugins/i18n.ts` — see `i18n.mdc`
+- URL paths: `ui/src/enums/api.enum.ts` · Routes: `ui/src/enums/router.enum.ts`
+- Locales: **`src/global/locales/`** — see `i18n.mdc`
+
+Full layout, data layers, reference implementations: [reference.md](../skills/platform-agents/reference.md).
 
 ## Before writing code
 
@@ -36,84 +26,14 @@ dealer-platform-docker/          # Docker repo (parent)
 3. **Minimal scope** — only change what the task needs; no drive-by refactors.
 4. Do not add tests, docs, or commits unless explicitly requested.
 
-## Prefer latest patterns
-
-`.cursor/rules/` describe **current** project norms — not every legacy file in the repo.
-
-| Situation                      | Follow                                                                                     |
-| ------------------------------ | ------------------------------------------------------------------------------------------ |
-| **New file or feature**        | [agent-orchestration.mdc](.cursor/rules/agent-orchestration.mdc) + [workflows.md](.cursor/skills/platform-agents/workflows.md) |
-| **Editing existing file**      | Neighbouring code in that file for consistency; do not copy legacy patterns into new areas |
-| **Quick fix** (typo, i18n, cosmetic, user says *szybka poprawka* / *bez review*) | [workflows.md → Quick fix](.cursor/skills/platform-agents/workflows.md#quick-fix-skip-full-workflow) — `vue-component-creator` only |
-| **New Vue component**          | [workflows.md → New component (default)](.cursor/skills/platform-agents/workflows.md#new-component-default) |
-| **Refactor Vue / UI**          | [workflows.md → Refactor (default)](.cursor/skills/platform-agents/workflows.md#refactor-default) |
-| **Bugfix** (existing screen) | [bugfix.mdc](.cursor/rules/bugfix.mdc) → [bugfix.md](.cursor/skills/platform-agents/bugfix.md) |
-| **New read-heavy server data** | Pinia Colada (`ui/src/queries/` + `ui/src/api/`) — not store caches                        |
-| **Frontend HTTP**              | `services.mdc` — `XxxService` + `ServiceHelper`, or `api/` for Colada                      |
-| **New UI / DOM / reactivity**  | `vue.mdc` — VueUse, `defineModel`, typed props/emits, Vuetify form norms                   |
-| **Navigation / routing**       | `vue.mdc` — Vue Router (`useRouter`, `useRoute`, `RouterName`, `RouterPathEnum`)           |
-| **New mutable domain state**   | `pinia-stores.mdc` — setup stores + `services/`                                            |
-| **Backend API**                | [nestjs-api-agent](.cursor/skills/nestjs-api-agent/SKILL.md) + [specialists](.cursor/specialists/README.md) |
-| **List screens / grids**       | `data-grid.mdc` — DataGrid, metadata, search wiring                                        |
-| **User-facing copy**           | `i18n.mdc` — locale keys in `src/global/locales/en/`                                       |
-
-Reference implementations (prefer over ad-hoc legacy code):
-
-- Colada: `ui/src/queries/vehicle-configurator.queries.ts`, `SupplementaryProductsSection.vue`
-- Stores: `enquiry.store.ts` (domain state only — not a template for cached lists)
-- Router: `SaveBanner.vue`, `configPath.ts`, `ui/src/router/index.ts`
-- Backend: `customer.controller.ts`, `customer.service.ts`
-- Services: `enquiry.service.ts`, `vehicle-configurator.api.ts`
-- DataGrid: `FieldSetManagmentList.vue`, `customer.metadata.ts`
-- i18n: `src/global/locales/en/customer.ts`
-
-When rules and old code conflict, **rules win** for new work. Ask before refactoring unrelated legacy code to match.
-
-## Vue & TypeScript
-
-UI components and composables: see **`.cursor/rules/vue.mdc`** (Vue 3, Vuetify 3, Vue Router, VueUse).
-
-- Type `defineProps` and `defineEmits`; avoid `any`.
-
-## State & data layers (actual)
-
-| Layer                        | Role                                            | When to use                                                         |
-| ---------------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
-| **`ui/src/services/`**       | Primary HTTP — class services + `ServiceHelper` | Default for most domains — see `services.mdc`                       |
-| **`ui/src/stores/`**         | Pinia setup stores — domain state + often HTTP  | Existing flows (`enquiry.store.ts`, …)                              |
-| **`ui/src/queries/`**        | Pinia Colada — cached read queries              | New read-heavy features — see `.cursor/rules/pinia-colada.mdc`      |
-| **`ui/src/api/`**            | Thin HTTP helpers for Colada                    | Used by `ui/src/queries/` — see `services.mdc` + `pinia-colada.mdc` |
-| **`views/` / `components/`** | UI — stores, services, composables              | Match neighbouring files                                            |
-
-**Legacy norm:** stores call `XxxService` and cache entities (`selectedEnquiry`, `enquiries`).
-**New read-heavy data:** use Pinia Colada in `ui/src/queries/` — see `.cursor/rules/pinia-colada.mdc`. Do not rewrite legacy stores unless asked.
-
-## Backend
-
-See **`.cursor/rules/nestjs.mdc`** for full conventions. Skill: **`nestjs-api-agent`**.
-
-- UI controllers: `src/ui-api/` → mounted at `/uiapi/`
-- Domain logic: `src/domain/`
-- Entities/migrations: `src/db/`
-- Shared enums: `src/global/enum/`
-- Grid metadata: `src/domain/grid/metadata/`
+Rules win over legacy code for **new** work. Layer-specific norms: `.cursor/rules/*.mdc` (loaded by task triggers).
 
 ## Git
 
 - Never commit, push, or amend unless the user explicitly asks.
 
-## Agent skills
+## Agent routing
 
-Entry: **`AGENTS.md`** or **[decision.md](.cursor/specialists/decision.md)** — pick **one** branch; do not preload every workflow doc. Authority: rules → domain agents → [specialists](.cursor/specialists/README.md) → `.agents/skills/`.
+Pick **one** branch — do not preload every workflow doc: **[routing.md](../specialists/routing.md)**.
 
-| User intent | Read first |
-| ----------- | ---------- |
-| Quick fix / *szybka poprawka* | [workflows → Quick fix](.cursor/skills/platform-agents/workflows.md#quick-fix-skip-full-workflow) — `vue-component-creator` only |
-| New `.vue` | [component-creation.mdc](.cursor/rules/component-creation.mdc) → [workflows → New component](.cursor/skills/platform-agents/workflows.md#new-component-default) → [vue-tier](.cursor/specialists/vue-tier.md) |
-| Refactor UI | [component-refactor.mdc](.cursor/rules/component-refactor.mdc) → [workflows → Refactor](.cursor/skills/platform-agents/workflows.md#refactor-default) |
-| Bugfix existing screen | [bugfix.mdc](.cursor/rules/bugfix.mdc) → [bugfix.md](.cursor/skills/platform-agents/bugfix.md) |
-| Multi-layer (screen + API + store) | [agent-orchestration.mdc](.cursor/rules/agent-orchestration.mdc) → [workflows.md](.cursor/skills/platform-agents/workflows.md) |
-
-After each domain agent pass → [vue-tier](.cursor/specialists/vue-tier.md) / [backend-tier](.cursor/specialists/backend-tier.md) / [by-agent](.cursor/specialists/by-agent.md) → [skill cards](.cursor/specialists/skills/README.md). End feature work with `platform-review-agent`; then `platform-performance-agent` when UI/reactivity changed.
-
-Project rules always win over supplementary skills in `.agents/skills/`.
+Quick fix (*szybka poprawka* / *bez review*): [workflows → Quick fix](../skills/platform-agents/workflows.md#quick-fix-skip-full-workflow) — `vue-component-creator` only. Full index when needed: [AGENTS.md](../../AGENTS.md) · [skills/README.md](../skills/README.md).

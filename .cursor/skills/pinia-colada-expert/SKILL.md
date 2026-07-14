@@ -18,7 +18,7 @@ Owns **cached server reads** via Pinia Colada. Does not replace existing `servic
 
 ## Prefer latest patterns
 
-Follow `pinia-colada.mdc` and mirror `vehicle-configurator.queries.ts` — this is the template for **new** cached reads. Do not copy legacy store+`watch`+service refetch patterns.
+Follow `pinia-colada.mdc` and your project's Colada reference in [reference.md](../platform-agents/reference.md) — template for **new** cached reads. Do not copy legacy store+`watch`+service refetch patterns.
 
 ## Rule
 
@@ -34,24 +34,24 @@ ui/src/
   queries/index.ts              # barrel exports
 ```
 
-Reference: `vehicle-configurator.queries.ts` + `vehicle-configurator.api.ts`.
+Reference: `queries/{domain}.queries.ts` + `api/{domain}.api.ts` in your repo (see [reference.md](../platform-agents/reference.md)).
 
 ## Query template
 
 ```ts
 import { defineQueryOptions } from '@pinia/colada';
-import { getFundedRegulatedProductOptions } from '@/api';
+import { getMyDomainItems } from '@/api';
 
-export const VEHICLE_CONFIGURATOR_KEYS = {
-  root: ['vehicle-configurator'] as const,
-  regulatedProducts: (payload: Payload) =>
-    [...VEHICLE_CONFIGURATOR_KEYS.root, 'regulated-products', ...getPayloadKeyParts(payload)] as const,
+export const MY_DOMAIN_KEYS = {
+  root: ['my-domain'] as const,
+  items: (payload: Payload) =>
+    [...MY_DOMAIN_KEYS.root, 'items', ...getPayloadKeyParts(payload)] as const,
 };
 
-export const vehicleConfiguratorRegulatedProducts = defineQueryOptions((payload: Payload) => ({
-  key: VEHICLE_CONFIGURATOR_KEYS.regulatedProducts(payload),
+export const myDomainItems = defineQueryOptions((payload: Payload) => ({
+  key: MY_DOMAIN_KEYS.items(payload),
   enabled: hasRequiredPayload(payload),
-  query: async () => getFundedRegulatedProductOptions(payload),
+  query: async () => getMyDomainItems(payload),
 }));
 ```
 

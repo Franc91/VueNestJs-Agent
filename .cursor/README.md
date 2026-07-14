@@ -6,7 +6,7 @@
 | --- | ------- |
 | [../README.md](../README.md) | Bundle install & scripts |
 | [../AGENTS.md](../AGENTS.md) | Agent index (this copy in `code/`) |
-| [specialists/decision.md](specialists/decision.md) | **Start here** in Cursor |
+| [specialists/routing.md](specialists/routing.md) | **Start here** in Cursor |
 
 ## Commands (run from bundle root)
 

@@ -1,253 +1,149 @@
-# Project reference — Dealer Platform (`code/`)
+# Project reference — Vue + NestJS monorepo
 
-Vue frontend in `code/ui/`. NestJS backend in `code/src/`. Docker orchestration in parent repo `dealer-platform-docker/`.
+**Template** — customize paths and examples for your workspace after `install.ps1`.
 
-## Canonical rules (source of truth)
+Assumed layout (adjust if yours differs):
 
-Follow these before improvising conventions:
+- Frontend: `{workspace}/ui/` (Vue 3 + Vite)
+- Backend: `{workspace}/src/` (NestJS)
+- UI API prefix: `/uiapi/`
 
-| Rule file                        | Scope                                                                  |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| `.cursor/rules/general.mdc`      | Monorepo layout, data layers, backend paths, git                       |
-| `.cursor/rules/vue.mdc`          | Vue 3, Vuetify 3, Vue Router, VueUse — components, composables, router |
-| `.cursor/rules/pinia-stores.mdc` | Pinia setup stores                                                     |
-| `.cursor/rules/pinia-colada.mdc` | Pinia Colada queries & API helpers                                     |
-| `.cursor/rules/services.mdc`     | Frontend HTTP — services, api helpers, path enums                      |
-| `.cursor/rules/nestjs.mdc`       | NestJS ui-api, domain, DTOs                                            |
-| `.cursor/rules/data-grid.mdc`    | DataGrid, metadata, list views                                         |
-| `.cursor/rules/i18n.mdc`         | Locales, `useI18n`, key naming                                         |
+## Customize for your project
 
-This file summarizes project layout; when it diverges from the rules, **the rules win**.
+| What to set | Where |
+| ----------- | ----- |
+| Stack (UI lib, ORM, auth) | [stack-profile.md](../../stack-profile.md) |
+| Folder layout, reference files | This file — edit paths below |
 
-## Stack profiles
+Point **reference implementations** to real files in **your** repo (one Colada query + consumer, one store + service, one grid, one controller).
 
-Frontend, backend, and TypeScript stack (supplementary skills scope) live in **[stack-profile.md](../../stack-profile.md)** — project-wide, not platform-agents-specific.
+## Canonical rules
 
-- [Frontend stack](../../stack-profile.md#frontend-stack)
-- [Backend stack](../../stack-profile.md#backend-stack)
-- [TypeScript stack](../../stack-profile.md#typescript-stack)
+| Rule file | Scope |
+| --------- | ----- |
+| `.cursor/rules/general.mdc` | Layout, git, agent routing |
+| `.cursor/rules/vue.mdc` | Vue 3, Vuetify, Router, VueUse |
+| `.cursor/rules/pinia-stores.mdc` | Pinia setup stores |
+| `.cursor/rules/pinia-colada.mdc` | Cached read queries |
+| `.cursor/rules/services.mdc` | HTTP — services vs api |
+| `.cursor/rules/nestjs.mdc` | ui-api, domain, DTOs |
+| `.cursor/rules/data-grid.mdc` | DataGrid, metadata |
+| `.cursor/rules/i18n.mdc` | Locales, `useI18n` |
 
-## Agents & supplementary routing
+Rules win over this summary.
 
-Orchestration and skill chains are **not** in this file — use:
+## Agent routing
 
 | Layer | Entry |
 | ----- | ----- |
 | Index | [AGENTS.md](../../../AGENTS.md) |
-| **Intent routing** | [decision.md](../../specialists/decision.md) |
-| Workflows (create, refactor, full-stack) | [workflows.md](../platform-agents/workflows.md) |
-| Bugfix (symptom → layer) | [bugfix.md](../platform-agents/bugfix.md) |
-| Supplementary routing (tier, cards) | [specialists/README.md](../../specialists/README.md) |
-| Active supplementary scope | [stack-profile.md](../../stack-profile.md) |
+| Intent | [routing.md](../../specialists/routing.md) |
+| Workflows | [workflows.md](../platform-agents/workflows.md) |
+| Bugfix | [bugfix.md](../platform-agents/bugfix.md) |
+| Supplementary | [specialists/README.md](../../specialists/README.md) |
 
-Domain agents: `.cursor/skills/{name}/SKILL.md`. Supplementary **content**: `.agents/skills/` (via [skill cards](../../specialists/skills/README.md)).
-
-### Agent naming
-
-| Prefix | Role |
-| ------ | ---- |
-| `platform-*` | Orchestration & audit across `ui/` + `src/` |
-| `vue-*` | Vue/UI domain agents (`vue.mdc`) |
-| `pinia-*`, `nestjs-*`, `data-grid-*` | Layer-specific domain agents |
-
-Full table: [AGENTS.md → Naming conventions](../../../AGENTS.md#naming-conventions).
-
-## Prefer latest patterns
-
-Always use **current** norms from `.cursor/rules/` — do not treat legacy code as the template.
-
-- **New work** → rules + reference implementations (`vehicle-configurator.queries.ts`, `SupplementaryProductsSection.vue`), not old store+service caches for read-heavy data.
-- **Edits in legacy files** → match that file locally; do not spread legacy patterns to new files or features.
-- **Unsure which API to use** → official docs (linked in each rule file), then rules, then reference implementations — not the oldest file in the domain.
-
-## Monorepo layout
+## Monorepo layout (typical)
 
 ```
-dealer-platform-docker/
-├── docker-compose.yml       # nestjs, frontend, postgres
-├── docker/
-└── code/                    # workspace root (git root)
-    ├── ui/                  # Vue 3 + Vite + TypeScript + Vuetify
-    │   └── src/
-    │       ├── api/                 # thin HTTP helpers for Colada
-    │       ├── components/          # shared + domain components (flat folders)
-    │       ├── composables/
-    │       ├── enums/               # incl. api.enum.ts (UiApiUrlPathEnum)
-    │       ├── interfaces/
-    │       ├── layouts/
-    │       ├── plugins/             # i18n.ts, vuetify.ts
-    │       ├── queries/             # Pinia Colada
-    │       ├── router/
-    │       ├── services/            # primary HTTP layer
-    │       │   └── api/             # Axios client (api.service.ts)
-    │       ├── stores/              # Pinia *.store.ts
-    │       ├── utils/
-    │       └── views/               # route-level pages (often feature-heavy)
-    ├── src/                 # NestJS backend
-    │   ├── ui-api/          # controllers/DTOs for frontend → /uiapi/
-    │   ├── domain/          # business modules
-    │   ├── db/              # TypeORM entities, migrations
-    │   ├── global/          # enums, locales
-    │   └── infrastructure/
-    └── env/
+your-repo/                   # or workspace root
+├── ui/                      # Vue 3 + Vite + TypeScript
+│   └── src/
+│       ├── api/             # thin HTTP for Colada
+│       ├── components/
+│       ├── composables/
+│       ├── enums/           # api.enum.ts, router.enum.ts
+│       ├── queries/         # Pinia Colada
+│       ├── router/
+│       ├── services/        # class services + ServiceHelper
+│       ├── stores/          # Pinia *.store.ts
+│       └── views/
+├── src/                     # NestJS
+│   ├── ui-api/              # BFF → /uiapi/
+│   ├── domain/
+│   ├── db/
+│   └── global/              # enums, shared locales
+└── env/                     # optional
 ```
 
-Path alias: `@/` → `ui/src/` (`ui/vite.config.mts`).
+Path alias: `@/` → `ui/src/` (common Vite setup).
 
 ## Environment & API
 
-| Topic                | Value                                                         |
-| -------------------- | ------------------------------------------------------------- |
-| Frontend REST prefix | `/uiapi/`                                                     |
-| Dev proxy            | Vite proxies `^/uiapi/` → NestJS (`nestjs:3000` in Docker)    |
-| HTTP client          | `ui/src/services/api/api.service.ts` (Axios)                  |
-| Path enums           | `ui/src/enums/api.enum.ts` (`UiApiUrlPathEnum`, `ApiBaseUrl`) |
+| Topic | Typical value |
+| ----- | ------------- |
+| Frontend REST | `/uiapi/` |
+| Dev proxy | Vite → NestJS `:3000` |
+| HTTP client | `ui/src/services/api/api.service.ts` (Axios) |
+| Path enums | `ui/src/enums/api.enum.ts` |
 
 ## State & data layers
 
-| Layer                    | Role                                            | When to use                            |
-| ------------------------ | ----------------------------------------------- | -------------------------------------- |
-| `ui/src/services/`       | Primary HTTP — class services + `ServiceHelper` | Default for most domains               |
-| `ui/src/stores/`         | Pinia setup stores — domain state + often HTTP  | Existing flows (`enquiry.store.ts`, …) |
-| `ui/src/queries/`        | Pinia Colada — cached read queries              | New read-heavy features                |
-| `ui/src/api/`            | Thin HTTP helpers for Colada                    | Used by `ui/src/queries/`              |
-| `views/` / `components/` | UI — stores, services, composables              | Match neighbouring files               |
+| Layer | Role | When |
+| ----- | ---- | ---- |
+| `services/` + `ServiceHelper` | Primary HTTP | Default mutations & legacy stores |
+| `stores/` | Domain + UI state | Selection, wizards, flags |
+| `queries/` + `api/` | Pinia Colada | **New** read-heavy cached data |
 
-**Legacy norm:** stores call `XxxService` and cache entities (`selectedEnquiry`, `enquiries`).
-**New read-heavy data:** use Pinia Colada in `ui/src/queries/` — do not migrate legacy stores unless asked.
+Do not migrate legacy store caches to Colada unless asked.
 
-## HTTP pattern (dominant)
-
-See `.cursor/rules/services.mdc` for when to use `services/` vs `api/`.
+## HTTP pattern
 
 ```
 Component / Store
-  → services/{domain}.service.ts     (class, static methods)
+  → services/{domain}.service.ts
     → ServiceHelper.requestWrapper()
-      → services/api/api.service.ts
-        → /uiapi/...
+      → api.service.ts → /uiapi/...
 ```
 
-Example:
+## Pinia Colada (new reads)
 
-```ts
-// ui/src/services/enquiry.service.ts
-import { ApiBaseUrl, RequestMethodEnum, UiApiUrlPathEnum } from '@/enums';
-import { ServiceHelper } from '@/utils/helpers';
+Pick **your** reference pair after install:
 
-export class EnquiryService {
-  static async getEnquiry(id: string) {
-    return ServiceHelper.requestWrapper({
-      method: RequestMethodEnum.GET,
-      url: `${ApiBaseUrl}${UiApiUrlPathEnum.ENQUIRY}/${id}`,
-    });
-  }
-}
-```
+- `ui/src/queries/{domain}.queries.ts` — `defineQueryOptions`, key factory
+- `ui/src/api/{domain}.api.ts` — HTTP only
+- Consumer `.vue` — `useQuery(() => …)`, `.data`, `.isPending`, `.refresh`
 
-## Pinia Colada
-
-Registered in `ui/src/main.ts`: `app.use(createPinia())` then `app.use(PiniaColada)`.
-
-Reference implementation:
-
-- `ui/src/queries/vehicle-configurator.queries.ts` — `defineQueryOptions`, `VEHICLE_CONFIGURATOR_KEYS`
-- `ui/src/api/vehicle-configurator.api.ts` — HTTP called from queries
-- Consumer: `SupplementaryProductsSection.vue` — `useQuery(() => …)`, `.data`, `.isPending`, `.error`, `.refresh`
-
-See `.cursor/rules/pinia-colada.mdc` for naming, key factories, and `enabled` guards.
+See [examples.md](../platform-agents/examples.md) §1.
 
 ## Pinia stores
 
-- Files: `ui/src/stores/{domain}.store.ts`
-- Export: `use{Domain}Store`, id: kebab-case
-- Setup stores only; HTTP via `@/services/`
-- Often cache server entities and call services directly (`enquiry.store.ts`, `user.store.ts`)
+- `{domain}.store.ts` → `use{Domain}Store`
+- Setup stores; HTTP via `@/services/`
+- Example pattern: selected entity + `setSelected*` actions
 
-See `.cursor/rules/pinia-stores.mdc`.
+## Vue & router
 
-## Vue components & composables
-
-- `<script setup lang="ts">` standard — see `.cursor/rules/vue.mdc`
-- i18n: `useI18n<{ message: MessageSchema }>({ useScope: 'global' })` or `useAppI18n()`
-- Vuetify 3 via `plugins/vuetify.ts`; forms often use `variant="underlined"`, `color="#48a0cc"`
-- Modals: prefer `CustomModal`; validation via `v-form` + `useCheckValidation(formRef)`
-- VueUse (`@vueuse/core`) for browser/DOM utilities — not manual `addEventListener` in new code
-- Components grouped by domain folder: `components/WhatNextAction/`, `components/DataGrid/`
-- Views are route shells but often contain substantial logic — match existing view style
-
-## Vue Router
-
-- Setup: `ui/src/router/index.ts` → registered in `main.ts`
-- Enums: `ui/src/enums/router.enum.ts` — `RouterName`, `RouterPathEnum`, `RouterPathBaseEnum`
-- Main menu routes: `ui/src/config/configPath.ts` (lazy `component: () => import(...)`)
-- Standalone trees: `ui/src/router/AuthRoutes.ts`, `AppraisalRoutes.ts`, …
-- Guards: global `beforeEach` / `afterEach` in `index.ts` only
-- `meta.roleAttributes` — permission checks via `PermissionHelper` in `beforeEach`
-- Route-change enquiry sync: `RouterHelper.syncSelectedEnquiryOnRouteChange` in `afterEach`
-- Navigation in views: `useRouter()` / `useRoute()` — prefer named routes, not hardcoded paths
-- Context route maps: `ui/src/constants/*-routes.ts`
-
-See `.cursor/rules/vue.mdc` and skill `vue-router-agent`.
+- `<script setup lang="ts">`, typed props/emits
+- Router enums in `enums/router.enum.ts`; lazy routes in config/router files
+- Guards in `router/index.ts` — match your project's auth pattern
 
 ## i18n
 
-See `.cursor/rules/i18n.mdc`.
-
-Single source: `src/global/locales/en/` (domain files: `enquiry.ts`, `vehicle.ts`, `what-next.ts`, …).
-
-```ts
-// ui/src/plugins/i18n.ts
-import * as messages from '../../../src/global/locales';
-```
-
-Add new keys in `src/global/locales/en/`, not in `ui/`.
+Shared locales outside `ui/` or under `src/global/locales/` — see `i18n.mdc`. Add keys in locale modules, not hardcoded in components.
 
 ## Backend (NestJS)
 
-See **[Backend stack](../../stack-profile.md#backend-stack)** in `stack-profile.md` for active stack profile and `nestjs-best-practices` rule scope.
-See `.cursor/rules/nestjs.mdc`. Skill: `nestjs-api-agent`.
+| Package | Role |
+| ------- | ---- |
+| `src/ui-api/{domain}/` | Controllers + DTOs |
+| `src/domain/{domain}/` | Business logic |
+| `src/db/` | TypeORM entities, migrations |
+| `src/domain/grid/metadata/` | DataGrid metadata |
 
-| Package                | Role                                                  |
-| ---------------------- | ----------------------------------------------------- |
-| `src/ui-api/{domain}/` | Controllers + DTOs → `/uiapi/`                        |
-| `src/domain/{domain}/` | Business logic (`*.service.ts`, `*.domain.module.ts`) |
-| `src/db/`              | TypeORM entities, repos, migrations                   |
-| `src/global/enum/`     | Shared enums                                          |
-| `src/infrastructure/`  | Guards (`CognitoAuthGuard`), pipes, validators        |
+Pick **your** reference controller + service (e.g. a simple CRUD domain).
 
-Aliases: `@domain/*`, `@uiapi/*`, `@db/*`, `@global/*`, `@infrastructure/*`.
+## DataGrid
 
-Reference: `customer.controller.ts`, `customer.service.ts`, `customer.ui-api.module.ts`.
-
-Grid metadata: `src/domain/grid/metadata/`.
-
-## DataGrid (list screens)
-
-See `.cursor/rules/data-grid.mdc`. Skill: `data-grid-agent`.
-
-| Piece            | Location                                       |
-| ---------------- | ---------------------------------------------- |
-| Components       | `ui/src/components/DataGrid/`, `TreeDataGrid/` |
-| Metadata URLs    | `UiApiGridUrlPathEnum` in `api.enum.ts`        |
-| Search URLs      | `UiApiUrlPathEnum.*_SEARCH`                    |
-| Backend metadata | `src/domain/grid/metadata/*.metadata.ts`       |
-| Grid API         | `src/ui-api/grids/grids.controller.ts`         |
-
-Reference: `CustomerList.vue` (TreeDataGrid), `FieldSetManagmentList.vue` (DataGrid).
+- UI: `DataGrid` / `TreeDataGrid` components
+- Backend metadata: `src/domain/grid/metadata/*.metadata.ts`
+- Enums: grid + search URL paths in `api.enum.ts`
 
 ## Naming conventions
 
-| Artifact          | Pattern                                  | Example                                     |
-| ----------------- | ---------------------------------------- | ------------------------------------------- |
-| Service           | `services/{domain}.service.ts`           | `enquiry.service.ts`                        |
-| Store             | `stores/{domain}.store.ts`               | `enquiry.store.ts`                          |
-| Colada queries    | `queries/{domain}.queries.ts`            | `vehicle-configurator.queries.ts`           |
-| Colada API        | `api/{domain}.api.ts`                    | `vehicle-configurator.api.ts`               |
-| Component         | `components/{Domain}/{Name}.vue`         | `WhatNextAction/WhatNextAction.vue`         |
-| View              | `views/{domain}/{Name}/{Name}.vue`       | `enquiry/AddEditEnquiry/AddEditEnquiry.vue` |
-| Composable        | `composables/use{Name}.ts`               | `useAppI18n.ts`                             |
-| Interface         | `interfaces/{domain}/`                   | `interfaces/enquiry/enquiry.interface.ts`   |
-| Route enum        | `enums/router.enum.ts`                   | `RouterName`, `RouterPathEnum`              |
-| UI API controller | `ui-api/{domain}/{domain}.controller.ts` | `customer.controller.ts`                    |
-| Domain service    | `domain/{domain}/{domain}.service.ts`    | `customer.service.ts`                       |
+| Artifact | Pattern |
+| -------- | ------- |
+| Service | `services/{domain}.service.ts` |
+| Store | `stores/{domain}.store.ts` |
+| Colada | `queries/{domain}.queries.ts` + `api/{domain}.api.ts` |
+| View | `views/{Feature}/{Name}.vue` |
+| UI API | `ui-api/{domain}/{domain}.controller.ts` |

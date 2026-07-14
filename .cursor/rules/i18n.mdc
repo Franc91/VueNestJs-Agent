@@ -22,7 +22,7 @@ src/global/locales/
   en/
     index.ts            # merges all domain modules into `en` object
     customer.ts         # domain keys
-    enquiry.ts
+    order.ts
     errors.ts
     actions.ts
     pages.ts
@@ -59,7 +59,7 @@ const t = useAppI18n();
 | Pattern        | Example                                                | Use                 |
 | -------------- | ------------------------------------------------------ | ------------------- |
 | Domain noun    | `t('customer.customer')`                               | Entity labels       |
-| Nested object  | `t('enquiry.status')`                                  | Grouped fields      |
+| Nested object  | `t('order.status')`                                    | Grouped fields      |
 | Shared actions | `t('actions.save')`, `t('actions.cancel')`             | Buttons             |
 | CRUD helpers   | `t('crudItem.createItem', { name: t('fieldSet') })`    | Add/edit titles     |
 | List titles    | `t('item.itemList', { name: t('customer.customer') })` | Grid/page headers   |
