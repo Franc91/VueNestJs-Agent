@@ -1,0 +1,34 @@
+{
+  "plugins": {
+    "clerk": {
+      "enabled": true
+    },
+    "atlassian": {
+      "enabled": true
+    },
+    "cursor-team-kit": {
+      "enabled": true
+    },
+    "snyk-secure-development": {
+      "enabled": true
+    },
+    "agent-compatibility": {
+      "enabled": true
+    },
+    "cli-for-agent": {
+      "enabled": true
+    },
+    "forge-skills": {
+      "enabled": true
+    },
+    "modern-web-guidance": {
+      "enabled": true
+    },
+    "twilio-developer-kit": {
+      "enabled": true
+    },
+    "snyk-api-web": {
+      "enabled": true
+    }
+  }
+}

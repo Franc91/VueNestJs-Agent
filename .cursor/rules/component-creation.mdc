@@ -1,0 +1,12 @@
+---
+description: New Vue component — create, scaffold, add .vue file. Polish — stwórz komponent, utwórz komponent, nowy komponent, dodaj komponent. Recipe in workflows.md.
+alwaysApply: false
+---
+
+# New Vue component
+
+**create** / **scaffold** / **add new** `.vue` (or Polish: *stwórz* / *utwórz* / *nowy komponent*) → [workflows.md → New component (default)](.cursor/skills/platform-agents/workflows.md#new-component-default). Classify [vue-tier](.cursor/specialists/vue-tier.md) before coding.
+
+Quick fix / *szybka poprawka* / *bez review* → [Quick fix](.cursor/skills/platform-agents/workflows.md#quick-fix-skip-full-workflow).
+
+Multi-layer (route + API + UI) → also [agent-orchestration.mdc](agent-orchestration.mdc).

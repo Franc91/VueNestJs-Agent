@@ -1,0 +1,9 @@
+# Installed supplementary skill content (not versioned — placeholder README is tracked)
+.agents/skills/*
+!.agents/skills/README.md
+install.config.json
+node_modules/
+
+# OS / IDE
+.DS_Store
+Thumbs.db

@@ -1,0 +1,119 @@
+---
+description: Pinia Colada — cached read queries, defineQueryOptions, useQuery patterns
+globs: ui/src/queries/**/*.ts, ui/src/api/**/*.ts
+alwaysApply: false
+---
+
+# Pinia Colada
+
+**Language:** Write all query definitions, API helpers, comments, and related commit messages in **English**.
+
+[Pinia Colada](https://pinia-colada.esm.dev/) (`@pinia/colada`) handles **read-heavy, cacheable server data**. It complements — but does not replace — Pinia setup stores in `ui/src/stores/`. See `.cursor/rules/pinia-stores.mdc` for mutable domain state.
+
+Registered in `ui/src/main.ts`: `app.use(createPinia())` then `app.use(PiniaColada)`.
+
+## Official documentation
+
+When unsure about Colada APIs, caching, query keys, or mutations, **check the official docs first** before guessing:
+
+- [Pinia Colada documentation](https://pinia-colada.esm.dev/)
+
+Useful entry points:
+
+- [Queries](https://pinia-colada.esm.dev/guide/query.html)
+- [Query keys](https://pinia-colada.esm.dev/guide/query-keys.html)
+- [defineQueryOptions](https://pinia-colada.esm.dev/guide/query-options.html)
+
+Prefer documented Colada patterns over ad-hoc caching in Pinia stores. If the docs and this repo diverge, follow **this project's conventions** below and align with `vehicle-configurator.queries.ts`.
+
+## When to use Colada vs Pinia stores
+
+| Use **Colada** (`ui/src/queries/`)            | Use **Pinia store** (`ui/src/stores/`)  |
+| --------------------------------------------- | --------------------------------------- |
+| GET-style reads that benefit from cache/dedup | Selected entity, wizard state, UI flags |
+| Shared lists/options keyed by request params  | Mutations, POST/PATCH flows             |
+| Multiple components need the same cached read | Loader/dialog flags (`loader.store`)    |
+
+**Do not** migrate legacy store domains to Colada unless explicitly asked. **Do not** grow an existing store with large read-only caches — add a query in `ui/src/queries/` instead.
+
+## File layout
+
+| Path                                 | Role                                      |
+| ------------------------------------ | ----------------------------------------- |
+| `ui/src/queries/{domain}.queries.ts` | `defineQueryOptions`, query key factories |
+| `ui/src/queries/index.ts`            | Barrel exports                            |
+| `ui/src/api/{domain}.api.ts`         | Thin HTTP functions used by queries       |
+
+Reference implementation: `vehicle-configurator.queries.ts` + `vehicle-configurator.api.ts`.
+
+## Naming (project convention)
+
+| Item                 | Pattern                        | Example                                |
+| -------------------- | ------------------------------ | -------------------------------------- |
+| Query file           | `{domain}.queries.ts`          | `vehicle-configurator.queries.ts`      |
+| API helper file      | `{domain}.api.ts`              | `vehicle-configurator.api.ts`          |
+| Key factory          | `{DOMAIN}_KEYS`                | `VEHICLE_CONFIGURATOR_KEYS`            |
+| Query options export | `{domain}{Resource}` camelCase | `vehicleConfiguratorRegulatedProducts` |
+
+## Query definitions (`defineQueryOptions`)
+
+- Export named query options from `*.queries.ts`
+- Use a **key factory** object for stable, hierarchical keys
+- Include every parameter that affects the response in the key
+- Set `enabled` when required params are missing — do not fire invalid requests
+- Keep `query` thin: call `@/api/` helpers, not raw HTTP inside the query file
+
+See also `.cursor/rules/services.mdc` for `services/` vs `api/` boundaries.
+
+```ts
+import { defineQueryOptions } from '@pinia/colada';
+import { getMyDomainItems } from '@/api';
+
+export const MY_KEYS = {
+  root: ['my-domain'] as const,
+  items: (payload: PayloadInterface) => [...MY_KEYS.root, 'items', payload.id ?? ''] as const,
+};
+
+const hasRequiredPayload = (payload: PayloadInterface) => Boolean(payload?.id);
+
+export const myDomainItems = defineQueryOptions((payload: PayloadInterface) => ({
+  key: MY_KEYS.items(payload),
+  enabled: hasRequiredPayload(payload),
+  query: async () => getMyDomainItems(payload),
+}));
+```
+
+## Consuming queries in components
+
+- `import { useQuery } from '@pinia/colada'`
+- Import query options from `@/queries`
+- Pass a **getter** so the query reacts to param changes
+
+```ts
+const productsPayload = computed(() => ({
+  /* params */
+}));
+
+const regulatedProducts = useQuery(() => vehicleConfiguratorRegulatedProducts(productsPayload.value));
+```
+
+- Use `.data`, `.isPending`, `.error`, and `.refresh` — match `SupplementaryProductsSection.vue`
+
+## API helpers (`ui/src/api/`)
+
+- One function per endpoint; return unwrapped response data
+- Use `UiApiUrlPathEnum` for paths
+- Class services in `@/services/` remain the default for non-Colada flows; Colada queries import from `@/api`
+
+## Inline `useQuery` inside stores
+
+A rare hybrid exists (e.g. `customer-offer.store.ts`). **Prefer** `ui/src/queries/` for new reusable reads. Only colocate `useQuery` in a store when the query is tightly coupled to that store and not reused elsewhere.
+
+## Before finishing
+
+- [ ] Query keys include all response-affecting parameters
+- [ ] `enabled` guards missing or invalid params
+- [ ] HTTP lives in `ui/src/api/` (or an existing service) — not duplicated
+- [ ] New queries exported from `ui/src/queries/index.ts`
+- [ ] Components use `useQuery(() => ...)` for reactive params
+- [ ] Did not refactor unrelated Pinia stores to Colada

@@ -1,0 +1,255 @@
+---
+description: Vue 3, Vuetify 3, Vue Router, and VueUse conventions for UI components and composables
+globs: ui/src/**/*.vue, ui/src/composables/**/*.ts, ui/src/router/**/*.ts
+alwaysApply: false
+---
+
+# Vue, Vuetify & VueUse
+
+**Language:** Write all component code, composables, comments, and related commit messages in **English**.
+
+Applies to `ui/src/**/*.vue`, `ui/src/composables/**/*.ts`, and `ui/src/router/**/*.ts`. For state layers see `general.mdc`, `pinia-stores.mdc`, and `pinia-colada.mdc`.
+
+## Official documentation
+
+When unsure, **check the official docs first** before guessing:
+
+| Library    | Docs                                          |
+| ---------- | --------------------------------------------- |
+| Vue 3      | [vuejs.org](https://vuejs.org/)               |
+| Vue Router | [router.vuejs.org](https://router.vuejs.org/) |
+| Vuetify 3  | [vuetifyjs.com](https://vuetifyjs.com/)       |
+| VueUse     | [vueuse.org](https://vueuse.org/)             |
+
+Plugin setup: `ui/src/plugins/vuetify.ts`, `ui/src/main.ts`.
+
+---
+
+## Vue 3
+
+### Component style
+
+- **`<script setup lang="ts">`** only — no Options API in new code
+- Type **`defineProps`** and **`defineEmits`**
+- **Destructure props** from `defineProps` — set defaults in the destructuring pattern, not via `withDefaults` / `props.foo`; keep `const props = defineProps(...)` only when the whole object is needed (e.g. `v-bind="$props"`)
+- Use **`defineModel`** for `v-model` bindings (parent ↔ child)
+- Prefer **`computed`** over `watch` when deriving state
+- **`defineExpose`** only when parents need imperative access (e.g. `formRef`, `open()`)
+- Avoid name shadowing — do not reuse ref names as destructured params
+- Wire props through every layer — undeclared props are not passed to children
+- Remove `console.log`, `debugger`, and dead code before finishing
+
+### Template & reactivity
+
+- Keep templates declarative; move non-trivial logic to `computed` or functions
+- Use `v-if` / `v-show` consistently with neighbouring components
+- Prefer `storeToRefs` when destructuring Pinia state in components
+- User-facing strings: `useI18n` / `useAppI18n` / `t('key')` — keys in `src/global/locales/en/` — see **`i18n.mdc`**
+
+```vue
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { MessageSchema } from '@/plugins/i18n';
+
+const { t } = useI18n<{ message: MessageSchema }>({ useScope: 'global' });
+
+const { isCreate = false } = defineProps<{ isCreate?: boolean }>();
+
+const emits = defineEmits<{ save: []; cancel: [] }>();
+const isOpen = defineModel<boolean>('isOpen', { default: false });
+</script>
+```
+
+### Composables (`ui/src/composables/`)
+
+- Extract reusable logic into `useXxx.ts`; export from `ui/src/composables/index.ts`
+- Name: `use` + PascalCase domain (`useChangeFormDetection`, `useAppI18n`)
+- Composables return refs/computed/functions — avoid hidden side effects unless documented
+- **Before** writing manual `addEventListener` / resize / storage logic, check if **VueUse** already provides it
+
+#### Do not extract single-use logic
+
+When **creating** or **refactoring** a Vue component, keep logic in the SFC (`<script setup>`) if it is used **only** by that component.
+
+**Do not** add a file under `ui/src/composables/` when:
+
+- The logic has a single consumer (the component being created or refactored)
+- Extraction does not enable reuse across components/views
+
+**Extract** a composable only when:
+
+- Two or more components or views need the same logic
+- The behavior is shared domain orchestration (match existing `ui/src/composables/` patterns)
+
+For single-use cases, prefer local `computed`, functions, and VueUse primitives in the component — not a dedicated `useXxx.ts`.
+
+```ts
+// ❌ BAD — only used in ComplianceProgress.vue
+// ui/src/composables/useComplianceProgress.ts
+export function useComplianceProgress() { /* ... */ }
+
+// ✅ GOOD — colocated in ComplianceProgress.vue
+const progress = computed(() => /* ... */)
+async function onSubmit() { /* ... */ }
+
+// ✅ GOOD — shared by Stage1, Stage2, Stage3
+// ui/src/composables/useComplianceValidation.ts
+```
+
+---
+
+## Vue Router
+
+Use **Vue Router** for all in-app navigation — not `window.location`, `history.pushState`, or ad-hoc URL strings.
+
+Setup: `ui/src/router/index.ts` (registered in `ui/src/main.ts`).
+
+### Navigation in components
+
+- **`useRouter()`** / **`useRoute()`** from `vue-router` — not a custom router wrapper
+- Prefer **named routes** via `RouterName` — `router.push({ name: RouterName.ENQUIRY_EDIT, params, query })`
+- Paths and base segments: **`RouterPathEnum`**, **`RouterPathBaseEnum`** from `@/enums` — do not hardcode URL strings
+- Declarative links: **`RouterLink`** / `<router-link>` when the UI is a plain anchor-style navigation
+- Route params / query: read from **`useRoute()`** (`route.params`, `route.query`, `route.name`) — do not parse `window.location` manually
+- React to param changes with **`watch(() => route.params.xxx, …)`** or `computed` — do not assume `onMounted` runs again on same component instance
+- **`router.replace`** when navigation should not add a history entry (e.g. post-login redirect); **`router.push`** for normal navigation
+- Unsaved-changes redirects: reuse **`redirectTo`** from `@/utils/util` or **`SweetAlertHelper.redirectPopUp`** when the surrounding file already uses that pattern
+
+```ts
+import { useRouter, useRoute } from 'vue-router';
+import { RouterName } from '@/enums';
+
+const router = useRouter();
+const route = useRoute();
+
+router.push({ name: RouterName.DIARY, params: { mode: 'edit' } });
+```
+
+### Adding or changing routes
+
+| Location                       | Role                                                                |
+| ------------------------------ | ------------------------------------------------------------------- |
+| `ui/src/router/`               | Route modules (`MainRoutes`, `AuthRoutes`, …) and `index.ts` guards |
+| `ui/src/enums/router.enum.ts`  | `RouterName`, `RouterPathEnum`, `RouterPathBaseEnum`                |
+| `ui/src/config/configPath.ts`  | Main-layout child routes (menu-driven)                              |
+| `ui/src/constants/*-routes.ts` | Context-specific route maps (e.g. action-button, customer-text)     |
+
+**Route `meta`** (permissions, auth): set in `configPath.ts` or route modules — e.g. `roleAttributes`, `options`, `requiresAuth`. Do not duplicate permission checks in components when `beforeEach` already handles them.
+
+**Guards & side effects:** global guards live only in `ui/src/router/index.ts` (`beforeEach`, `afterEach`). Route-change domain sync → **`RouterHelper`** — hook from `afterEach`, not scattered in components.
+
+**Lazy routes:** `component: () => import('@/views/...')` — match neighbouring route definitions in `configPath.ts` / `router/`.
+
+Reference: `SaveBanner.vue`, `WhatsNext.vue`, `WidgetModal.vue`, `configPath.ts`.
+
+---
+
+## Vuetify 3
+
+Configured in `ui/src/plugins/vuetify.ts` — default theme `LIGHT_THEME`, icon set **MDI** (`mdi-*`).
+
+### Layout & structure
+
+- Grid: `v-container` → `v-row` → `v-col`
+- Cards: prefer existing wrappers (`CardItem`, `CustomModal`) over raw `v-card` when they match the screen
+- Modals: use **`CustomModal`** for standard dialogs; it wraps `v-dialog` + project header/footer styles
+- Loading: `Spinner` / `loader.store` — match surrounding screens
+
+### Form fields (project norm)
+
+Forms and modals commonly override global defaults. Match neighbouring fields in the same file:
+
+| Prop           | Typical value in forms/modals                                            |
+| -------------- | ------------------------------------------------------------------------ |
+| `variant`      | `underlined`                                                             |
+| `color`        | `#48a0cc` (brand accent)                                                 |
+| `class`        | `font-size-input input-style` (+ `pa-0` where needed)                    |
+| `hide-details` | `true` on dense rows; use `:messages` / `:rules` when showing validation |
+
+Global defaults in `vuetify.ts` use `outlined` + `comfortable` — **do not assume** every field uses them; read the file you are editing.
+
+### Validation
+
+- Wrap inputs in **`v-form`** with `ref="formRef"`
+- Validate via **`useCheckValidation(formRef)`** from `@/composables` (or `formRef.validate()` when already used locally)
+- Rules: `useRules()` from `vuetify/labs/rules` where the file already uses it; pass `t('errors....')` for messages
+- Dictionary-driven selects: `item-value="code"`, `item-title="title"` (or `description` — match the data shape)
+
+```vue
+<v-form ref="formRef" v-model="formValidate">
+  <v-text-field
+    v-model="model.name"
+    :label="t('name')"
+    color="#48a0cc"
+    variant="underlined"
+    class="font-size-input input-style pa-0"
+    hide-details
+    :rules="[rules.required(t('errors.fieldIsRequired', { name: t('name') }))]"
+  />
+</v-form>
+```
+
+### Buttons & actions
+
+Match existing action rows:
+
+- Primary save: `class="font-weight-bold text-uppercase btn-default bg-gradient-primary ..."`
+- Cancel/plain: `variant="plain"`, `elevation="0"`
+- Icon buttons: `mdi-*` via `icon="mdi-..."` or `<v-icon icon="mdi-..." />`
+- Uppercase labels for primary actions (`t('actions.save')`, `t('actions.cancel')`)
+
+### Icons
+
+- Default: **MDI** — `mdi-magnify`, `mdi-close`, `mdi-trash-can`, etc.
+- Custom icons registered in `vuetify.ts` under `custom` set — use only when already registered
+
+### Theming
+
+- Prefer theme tokens (`primary`, `error`, …) for new generic UI
+- Brand accent `#48a0cc` is widely used on form controls — keep consistency in forms
+- SCSS overrides live in `ui/src/scss/` — avoid inline styles unless the file already uses them
+
+---
+
+## VueUse (`@vueuse/core`)
+
+Dependency is installed; use it for **browser/DOM/reactivity utilities** instead of boilerplate.
+
+### When to use VueUse
+
+| Need                    | Prefer VueUse                          |
+| ----------------------- | -------------------------------------- |
+| Window/document events  | `useEventListener`                     |
+| Viewport / element size | `useWindowSize`, `useElementSize`      |
+| Debounce / throttle     | `useDebounceFn`, `useThrottleFn`       |
+| Local/session storage   | `useLocalStorage`, `useSessionStorage` |
+| Click outside, focus    | `onClickOutside`, `useFocus`           |
+| Toggle, async state     | `useToggle`, `useAsyncState`           |
+
+### Project conventions
+
+- Import from **`@vueuse/core`** (e.g. `import { useEventListener } from '@vueuse/core'`)
+- Do **not** add manual `window.addEventListener` / `removeEventListener` in new code when VueUse covers the case — see `AddEditEnquiry.vue` (`useEventListener`)
+- Domain-specific orchestration stays in `ui/src/composables/`; VueUse primitives can be composed inside those composables
+- Do **not** replace existing composables (e.g. `useIsMobile`) with VueUse unless refactoring that area is in scope
+
+```ts
+import { useEventListener } from '@vueuse/core';
+
+useEventListener(window, 'keydown', (event) => {
+  if (event.key === 'Escape') onClose();
+});
+```
+
+---
+
+## Before finishing
+
+- [ ] `<script setup lang="ts">`, typed props/emits, props destructured from `defineProps`
+- [ ] Vuetify fields match neighbouring styling (`underlined`, `#48a0cc`, `font-size-input input-style`)
+- [ ] User strings via `t()` / locale keys — not hardcoded
+- [ ] Form validation uses `v-form` + project validation helper where applicable
+- [ ] Browser/DOM utilities use VueUse when available
+- [ ] In-app navigation uses Vue Router (`useRouter` / `useRoute`, `RouterName` / `RouterPathEnum`)
+- [ ] Shared logic in `composables/` and exported from `index.ts` — single-use logic stays in the SFC

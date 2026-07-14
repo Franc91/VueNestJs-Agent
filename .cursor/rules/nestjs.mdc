@@ -1,0 +1,131 @@
+---
+description: NestJS backend — ui-api controllers, domain services, DTOs, TypeORM
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# NestJS backend
+
+**Language:** Write all backend code, comments, and related commit messages in **English**.
+
+Applies to `src/` (NestJS + TypeORM). Frontend consumes endpoints at **`/uiapi/`** — path enums live in `ui/src/enums/api.enum.ts`.
+
+## Official documentation
+
+When unsure, check [NestJS docs](https://docs.nestjs.com/) and [TypeORM docs](https://typeorm.io/) before guessing.
+
+## Layer boundaries
+
+| Layer              | Path                   | Role                                  |
+| ------------------ | ---------------------- | ------------------------------------- |
+| **UI API**         | `src/ui-api/{domain}/` | HTTP controllers + DTOs for frontend  |
+| **Domain**         | `src/domain/{domain}/` | Business logic, orchestration         |
+| **Database**       | `src/db/`              | Entities, repositories, migrations    |
+| **Global**         | `src/global/enum/`     | Shared enums                          |
+| **Infrastructure** | `src/infrastructure/`  | Guards, pipes, validators, decorators |
+
+**Controllers stay thin** — validate input, call domain service, return response. No business logic or direct complex queries in controllers.
+
+## UI API module layout
+
+```
+src/ui-api/{domain}/
+  {domain}.controller.ts
+  {domain}.ui-api.module.ts
+  dto/
+    {domain}.dto.ts
+```
+
+Register new modules in `src/ui-api/ui-api.module.ts`.
+
+Reference: `src/ui-api/customer/` (`customer.controller.ts`, `customer.ui-api.module.ts`).
+
+## Controller conventions
+
+```ts
+@UseGuards(CognitoAuthGuard)
+@Controller('/uiapi/customer')
+export default class CustomerController {
+  constructor(private readonly customerService: CustomerService) {}
+
+  @Post('search')
+  public async search(
+    @Body() params: FilterParams,
+    @Session() { user }: SessionData,
+  ): Promise<SearchResponse<Customer>> {
+    return this.customerService.search(params, user);
+  }
+}
+```
+
+- **`@Controller('/uiapi/{resource}')`** — prefix must match frontend `ApiBaseUrl`
+- **`@UseGuards(CognitoAuthGuard)`** on protected routes (match neighbouring controllers)
+- **`@Session() { user }: SessionData`** for authenticated user context
+- **Search endpoints:** usually `@Post('search')` or `@Post('/search')` returning `SearchResponse<T>`
+- **Validation:** `CustomValidationPipe` with `ValidationGroup.*` for create/update; `ValidationPipe` for simpler bodies
+- **Logging:** `Logger` on controller; log errors with `getErrorDataToLog` where file already uses it
+- **Default export** for controller and module classes (project norm)
+
+## Domain module layout
+
+```
+src/domain/{domain}/
+  {domain}.service.ts
+  {domain}.domain.module.ts
+```
+
+```ts
+@Module({
+  imports: [
+    /* other domain modules, ConfigModule */
+  ],
+  providers: [CustomerService, CustomerRepository],
+  exports: [CustomerService],
+})
+export default class CustomerDomainModule {}
+```
+
+- Domain service: **`@Injectable()`**, `export default class XxxService`
+- Import domain module in matching **`{domain}.ui-api.module.ts`**
+- Repositories from `@db/repo/`; entities from `@db/entities/`
+
+## DTOs
+
+- Live in `src/ui-api/{domain}/dto/`
+- Use **`class-validator`** + **`class-transformer`** (`@Expose`, `@Transform`, `@ValidateNested`)
+- Validation groups: **`ValidationGroup`** from `@db/enum` — separate create/update/draft rules
+- Custom validators: `@infrastructure/validation` (`CustomDataValidator`, `DictionaryFieldValidator`, …)
+- Shared field DTOs: `@infrastructure/dto` (e.g. `AddressDTO`, `FieldValueDTO`)
+
+## Path aliases (backend)
+
+| Alias               | Path                   |
+| ------------------- | ---------------------- |
+| `@domain/*`         | `src/domain/*`         |
+| `@uiapi/*`          | `src/ui-api/*`         |
+| `@db/*`             | `src/db/*`             |
+| `@global/*`         | `src/global/*`         |
+| `@infrastructure/*` | `src/infrastructure/*` |
+
+## Grids & search
+
+See **`.cursor/rules/data-grid.mdc`** for DataGrid metadata and list views.
+
+- Grid metadata: `src/domain/grid/metadata/`
+- Search/filter payloads: `FilterParams` from `@domain/grid/interfaces`
+- Domain services often use `GridService` for list/search endpoints
+
+## Migrations & entities
+
+- Entities: `src/db/entities/`
+- Migrations: `src/db/migrations/` — do not edit entities without considering migration impact
+- Enums: prefer `@db/enum` or `@global/enum` over string literals
+
+## Before finishing
+
+- [ ] Controller under `/uiapi/...` — thin, delegates to domain service
+- [ ] DTO validation with appropriate `ValidationGroup` / pipes
+- [ ] Domain logic in `src/domain/`, not in controller
+- [ ] UI API module registered in `ui-api.module.ts`
+- [ ] New frontend paths added to `ui/src/enums/api.enum.ts` when exposing new endpoints
+- [ ] Auth guard applied consistently with neighbouring endpoints

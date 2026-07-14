@@ -1,0 +1,80 @@
+---
+description: Pinia store conventions — setup stores, naming, domain state patterns
+globs: ui/src/stores/**/*.ts
+alwaysApply: false
+---
+
+# Pinia stores
+
+Stores live in `ui/src/stores/`. Barrel: `ui/src/stores/index.ts`.
+
+**Language:** Write all store code, comments, and commit messages for store changes in **English**.
+
+This rule covers **Pinia setup stores only**. For cached read queries (Pinia Colada), see `.cursor/rules/pinia-colada.mdc` — do not mix Colada patterns into stores unless extending an existing hybrid (e.g. `customer-offer.store.ts`).
+
+## Official documentation
+
+When unsure about Pinia APIs, patterns, or best practices, **check the official docs first** before guessing:
+
+- [Pinia documentation](https://pinia.vuejs.org/) — guides, API reference, and cookbook
+
+Useful entry points:
+
+- [Defining a store](https://pinia.vuejs.org/core-concepts/)
+- [Setup stores](https://pinia.vuejs.org/cookbook/composables.html) (this project uses setup stores only)
+- [Store composition](https://pinia.vuejs.org/cookbook/composing-stores.html)
+- [TypeScript](https://pinia.vuejs.org/core-concepts/#typescript)
+
+Prefer documented Pinia patterns over ad-hoc workarounds. If the docs and this repo diverge, follow **this project's conventions** below and align with existing stores in `ui/src/stores/`.
+
+## Naming (project convention)
+
+| Item     | Pattern             | Example                             |
+| -------- | ------------------- | ----------------------------------- |
+| File     | `{domain}.store.ts` | `enquiry.store.ts`                  |
+| Export   | `use{Domain}Store`  | `useEnquiryStore`                   |
+| Store id | kebab-case          | `'enquiry'`, `'finance-calculator'` |
+
+## Style
+
+Setup stores only: `defineStore('id', () => { ref, computed, functions, return })`.
+
+```ts
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import { EnquiryService } from '@/services';
+
+export const useEnquiryStore = defineStore('enquiry', () => {
+  const selectedEnquiry = ref<EnquiryInterface>();
+  const isUpdate = ref(false);
+
+  const hasSelectedEnquiry = computed(() => Boolean(selectedEnquiry.value?.id));
+
+  async function setSelectedEnquiry(enquiryId?: string) {
+    // call EnquiryService / domain helpers
+  }
+
+  function setIsUpdate() {
+    isUpdate.value = !isUpdate.value;
+  }
+
+  return { selectedEnquiry, isUpdate, hasSelectedEnquiry, setSelectedEnquiry, setIsUpdate };
+});
+```
+
+## Design rules
+
+1. **One domain per store** — `useEnquiryStore`, not a global god-store.
+2. **Minimal state** — local `ref` in a component when only one subtree needs it.
+3. **Expose mutations as functions** — components call store actions, not ad-hoc patches from outside.
+4. **Getters as `computed`** — derived values live in the store, not duplicated in views.
+5. **HTTP via services** — call `ui/src/services/*.service.ts`, not raw Axios in stores.
+6. **Cross-store composition** — stores may use other stores; avoid circular imports.
+7. **Reset helpers** — clear ephemeral state in `close()` / `reset()` when modals or wizards end.
+
+## Before finishing
+
+- [ ] Matches `{domain}.store.ts` + `use{Domain}Store` naming
+- [ ] Service calls go through `@/services/`, not inline HTTP
+- [ ] Returned state/actions are everything consumers need
+- [ ] New read-only cached data belongs in Colada (`pinia-colada.mdc`), not in this store

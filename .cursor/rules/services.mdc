@@ -1,0 +1,93 @@
+---
+description: Frontend HTTP layer — services, api helpers, ServiceHelper, path enums
+globs: ui/src/services/**/*.ts, ui/src/api/**/*.ts
+alwaysApply: false
+---
+
+# Frontend HTTP (`services/` & `api/`)
+
+**Language:** Write all service/API code, comments, and related commit messages in **English**.
+
+Applies to `ui/src/services/` and `ui/src/api/`. For Colada consumption see `pinia-colada.mdc`; for components see `vue.mdc`.
+
+## Official documentation
+
+- Axios is used via `ui/src/services/api/api.service.ts` — follow existing project patterns, not ad-hoc `fetch`.
+
+## When to use which layer
+
+| Layer                 | Path                                  | When to use                                                |
+| --------------------- | ------------------------------------- | ---------------------------------------------------------- |
+| **Class service**     | `ui/src/services/{domain}.service.ts` | Default — mutations, searches, domain flows, legacy stores |
+| **Colada API helper** | `ui/src/api/{domain}.api.ts`          | Thin HTTP called only from `ui/src/queries/`               |
+| **Axios client**      | `ui/src/services/api/api.service.ts`  | Low-level client — do not import in components             |
+
+**Do not** call HTTP from `components/`, `views/`, or `stores/` directly — go through `services/` or Colada (`api/` + `queries/`).
+
+## Path enums (required)
+
+- Base paths: **`ApiBaseUrl`** in `ui/src/enums/api.enum.ts`
+- Endpoint paths: **`UiApiUrlPathEnum`**
+- HTTP methods: **`RequestMethodEnum`**
+
+Do not hardcode `/uiapi/...` strings or full URLs in services, api helpers, or components.
+
+## Class services (dominant pattern)
+
+```ts
+import { ApiBaseUrl, RequestMethodEnum, UiApiUrlPathEnum } from '@/enums';
+import { ServiceHelper } from '@/utils/helpers';
+
+export class CustomerService {
+  static async search(params: FilterParams) {
+    return ServiceHelper.requestWrapper({
+      requestData: {
+        method: RequestMethodEnum.POST,
+        url: UiApiUrlPathEnum.CUSTOMER_SEARCH,
+        data: params,
+      },
+    });
+  }
+}
+```
+
+- Export **`XxxService`** class with **static** methods (match neighbouring domain services)
+- Use **`ServiceHelper.requestWrapper`** for loader, toast/popup success/error handling
+- Request/response types from **`@/interfaces/`**
+- Barrel: re-export from `ui/src/services/index.ts` when other domains already do
+
+## Colada API helpers
+
+```ts
+import { UiApiUrlPathEnum } from '@/enums';
+import ApiService from '../services/api/api.service';
+
+const http = new ApiService().getClient();
+
+export const getMyItems = async (payload: Payload) => {
+  const result = await http.post(UiApiUrlPathEnum.MY_ITEMS, payload);
+  return result.data;
+};
+```
+
+- One function per endpoint; return **unwrapped** `result.data`
+- Used by `ui/src/queries/` — not by components or stores directly
+- Do not duplicate the same endpoint in both `services/` and `api/` unless migrating — prefer one layer per call site
+
+## ServiceHelper behaviour
+
+`ServiceHelper.requestWrapper` (in `ui/src/utils/helpers/service.helper.ts`):
+
+- Shows/hides global loader via `loader.store` (unless `hideLoader: true`)
+- Optional success/error toast or SweetAlert via `success` / `error` config
+- Returns `response.data` on 2xx
+
+Match neighbouring service calls for `hideError`, `hideLoader`, and toast/popup options.
+
+## Before finishing
+
+- [ ] No raw Axios/`fetch` in components, views, or stores
+- [ ] URLs use `UiApiUrlPathEnum` / `ApiBaseUrl` — no magic strings
+- [ ] New Colada reads: HTTP in `api/`, queries in `queries/` — not new service+store cache
+- [ ] Types from `@/interfaces/` — avoid `any` on payloads
+- [ ] New service methods match static class pattern in the same domain file

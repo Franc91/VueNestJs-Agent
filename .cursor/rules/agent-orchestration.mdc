@@ -1,0 +1,14 @@
+---
+description: Multi-step Dealer Platform work — new screen, API+UI, store, Colada, grid, cross-layer bugfix. Chain domain agents via workflows.md. Polish — nowy ekran, endpoint, napraw błąd, store, lista.
+alwaysApply: false
+---
+
+# Agent orchestration
+
+**Multi-step** or **multi-layer** task in `ui/` or `src/` (not a [Quick fix](.cursor/skills/platform-agents/workflows.md#quick-fix-skip-full-workflow)):
+
+1. [workflows.md](.cursor/skills/platform-agents/workflows.md) or [bugfix.md](.cursor/skills/platform-agents/bugfix.md) — pick recipe.
+2. [platform-agents/SKILL.md](.cursor/skills/platform-agents/SKILL.md) — one domain agent per pass; handoffs between steps.
+3. After each domain agent → [specialists/](.cursor/specialists/README.md) for supplementary `.agents/skills/` ([specialists.mdc](specialists.mdc)).
+
+Details live in `workflows.md` — do not duplicate here.

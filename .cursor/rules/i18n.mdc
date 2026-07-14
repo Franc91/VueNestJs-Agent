@@ -1,0 +1,89 @@
+---
+description: i18n conventions — locale files, keys, useI18n, useAppI18n
+globs: src/global/locales/**/*.ts, ui/src/**/*.vue, ui/src/composables/**/*.ts
+alwaysApply: false
+---
+
+# i18n (internationalization)
+
+**Language:** Locale **values** are user-facing copy in **English** (en-GB). Code, comments, and commit messages in **English**.
+
+Single source of truth: **`src/global/locales/`** — wired in `ui/src/plugins/i18n.ts`.
+
+## Official documentation
+
+- [Vue I18n](https://vue-i18n.intlify.dev/)
+
+## File layout
+
+```
+src/global/locales/
+  index.ts              # exports { en }
+  en/
+    index.ts            # merges all domain modules into `en` object
+    customer.ts         # domain keys
+    enquiry.ts
+    errors.ts
+    actions.ts
+    pages.ts
+    ...
+```
+
+- Add keys in the **domain file** that matches the feature (`customer.ts`, `enquiry.ts`, …)
+- New domain module → create `en/{domain}.ts` and **import + spread** in `en/index.ts`
+- Do **not** add locale files under `ui/` — only `src/global/locales/`
+
+## Using i18n in Vue
+
+```ts
+import { useI18n } from 'vue-i18n';
+import type { MessageSchema } from '@/plugins/i18n';
+
+const { t } = useI18n<{ message: MessageSchema }>({ useScope: 'global' });
+```
+
+Or the project shorthand:
+
+```ts
+import { useAppI18n } from '@/composables';
+
+const t = useAppI18n();
+```
+
+- Always type with **`MessageSchema`** — enables key autocomplete and catches typos
+- User-facing strings in templates and scripts: **`t('key')`** — not hardcoded English in components
+- Validation messages: `t('errors.fieldIsRequired', { name: t('name') })`
+
+## Key naming conventions
+
+| Pattern        | Example                                                | Use                 |
+| -------------- | ------------------------------------------------------ | ------------------- |
+| Domain noun    | `t('customer.customer')`                               | Entity labels       |
+| Nested object  | `t('enquiry.status')`                                  | Grouped fields      |
+| Shared actions | `t('actions.save')`, `t('actions.cancel')`             | Buttons             |
+| CRUD helpers   | `t('crudItem.createItem', { name: t('fieldSet') })`    | Add/edit titles     |
+| List titles    | `t('item.itemList', { name: t('customer.customer') })` | Grid/page headers   |
+| Errors         | `t('errors.requireVehicle')`                           | Validation / toasts |
+| Warnings       | `t('warnings.unSaveChangesWarningTitle')`              | SweetAlert copy     |
+| Pages/menu     | `t('pages.diary')`                                     | Navigation labels   |
+
+## Pluralization
+
+Project uses pipe syntax in locale values:
+
+```ts
+customer: 'Customer| Customers',
+```
+
+In components: `t('customer.customer', 1)` / `t('customer.customer', 2)` or `t('template', 2)` for plural.
+
+## Backend / shared copy
+
+Locales are shared between frontend and can be referenced from backend-adjacent code. Keep domain boundaries — do not dump unrelated keys into `customer.ts`.
+
+## Before finishing
+
+- [ ] New user-facing strings added to `src/global/locales/en/` — not hardcoded in `.vue`
+- [ ] New domain file registered in `en/index.ts`
+- [ ] `useI18n<{ message: MessageSchema }>({ useScope: 'global' })` or `useAppI18n()`
+- [ ] Reused labels use existing keys (`actions.*`, `errors.*`, `crudItem.*`) before adding duplicates

@@ -1,0 +1,87 @@
+---
+description: DataGrid conventions — metadata, search endpoints, list views
+globs: ui/src/components/DataGrid/**/*.vue, ui/src/components/TreeDataGrid/**/*.vue, ui/src/components/DataGridWithTotals/**/*.vue, src/domain/grid/**/*
+alwaysApply: false
+---
+
+# DataGrid
+
+**Language:** Write all grid-related code, comments, and commit messages in **English**.
+
+List screens use **`DataGrid`**, **`TreeDataGrid`**, or **`DataGridWithTotals`** — not hand-rolled `v-data-table` for standard searchable lists.
+
+## Components
+
+| Component            | When to use                                                   |
+| -------------------- | ------------------------------------------------------------- |
+| `DataGrid`           | Flat searchable lists (templates, field sets, communications) |
+| `TreeDataGrid`       | Parent/child rows (customer → enquiries)                      |
+| `DataGridWithTotals` | Lists with footer totals                                      |
+
+Location: `ui/src/components/DataGrid/`, `TreeDataGrid/`, `DataGridWithTotals/`.
+
+## Frontend wiring (required props)
+
+```vue
+<DataGrid
+  :api-metadata-url="UiApiGridUrlPathEnum.GRID_FIELD_SET"
+  :api-data-url="UiApiUrlPathEnum.FIELD_SET_SEARCH"
+  headers-auto-parser-mapping
+  :fixed-conditions="fixedCondition"
+  :table-label="t('item.itemList', { name: t('fieldSet') })"
+/>
+```
+
+- **Metadata URL:** **`UiApiGridUrlPathEnum`** from `ui/src/enums/api.enum.ts` — GET `/uiapi/grids/...`
+- **Data URL:** **`UiApiUrlPathEnum`** — usually `POST .../search` on the domain endpoint
+- Do not hardcode `uiapi/grids/...` strings — use enums (legacy views may have hardcoded paths; do not copy that pattern)
+- **`fixedConditions`** — scope grid to dealership, enquiry, etc. (`FixedConditionInterface[]`)
+- **`defaultQueue`** — selects initial filter set when metadata defines queues (e.g. `'Customer'`)
+- **`headers-auto-parser-mapping`** — common on list screens; match neighbours
+- Row/header actions: **`actions`**, **`buttonActions`** — use `uuidv4()` for `key` like existing lists
+- Custom column rendering: named slots `#item.{columnValue}` or `#childStatusBadge` on `TreeDataGrid`
+
+Reference views: `CustomerList.vue`, `FieldSetManagmentList.vue`, `CommunicationsList.vue`.
+
+## Backend — grid metadata
+
+```
+src/domain/grid/
+  metadata/{domain}.metadata.ts   # columns, filterSets, subFilterSets
+  enums/metadata.grid.enum.ts     # GridMetadata enum
+  grid.service.ts                 # dispatches metadata + search
+src/ui-api/grids/grids.controller.ts   # GET /uiapi/grids/{name}
+```
+
+Adding a new grid:
+
+1. Create **`XxxMetadata`** class extending **`BaseMetadata`** in `metadata/`
+2. Register in **`GridService`** constructor and add getter method
+3. Add **`@Get('/grids/...')`** in **`grids.controller.ts`**
+4. Add **`UiApiGridUrlPathEnum`** entry in `api.enum.ts`
+5. Ensure domain **`POST .../search`** exists (`UiApiUrlPathEnum`) — often already on domain controller
+
+Metadata columns use `text`, `value`, `sortable`, `sortData`, optional `parse` / `html` from grid enums.
+
+## Search flow
+
+```
+View (DataGrid)
+  → GET apiMetadataUrl  → GridService → XxxMetadata.grid()
+  → POST apiDataUrl     → DomainService.search(FilterParams)
+```
+
+`FilterParams` from `@domain/grid/interfaces` — grid builds payload from metadata filter sets.
+
+## i18n
+
+- Table titles and action labels via **`t()`** — see `i18n.mdc`
+- Column headers come from metadata `text` (backend) — user-facing column labels are defined in metadata classes
+
+## Before finishing
+
+- [ ] `UiApiGridUrlPathEnum` + `UiApiUrlPathEnum` — no hardcoded grid URLs
+- [ ] Metadata class registered in `GridService` + `grids.controller.ts`
+- [ ] `fixedConditions` scoped correctly for the screen
+- [ ] Custom cells use slots — not template hacks that bypass grid parsers
+- [ ] Match neighbouring list view props (`show-filter-sets`, `hide-footer`, `auto-height`, …)

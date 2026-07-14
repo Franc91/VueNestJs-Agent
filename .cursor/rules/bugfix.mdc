@@ -1,0 +1,14 @@
+---
+description: Bugfix existing screen — wrong data, guard loop, store not updating, API error. Polish — napraw błąd, bug, nie działa, stale data. Recipe in bugfix.md.
+alwaysApply: false
+---
+
+# Bugfix
+
+**bugfix** / **fix** / **not working** (or Polish: *napraw błąd* / *nie działa*) on an **existing** screen → [bugfix.md → pick the layer](.cursor/skills/platform-agents/bugfix.md).
+
+Trivial one-liner / i18n → [Quick fix](.cursor/skills/platform-agents/workflows.md#quick-fix-skip-full-workflow).
+
+User asked to **refactor** → [component-refactor.mdc](component-refactor.mdc), not this rule.
+
+Multi-layer unclear cause → [agent-orchestration.mdc](agent-orchestration.mdc).

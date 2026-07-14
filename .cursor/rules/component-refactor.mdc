@@ -1,0 +1,12 @@
+---
+description: Refactor Vue UI — restructure, migrate, modernize existing components, views, stores, routes. Polish — zrefaktoruj, refaktoryzacja, migracja, przenieś logikę. Recipe in workflows.md.
+alwaysApply: false
+---
+
+# Vue refactor
+
+**refactor** / **restructure** / **migrate** / **modernize** (or Polish: *zrefaktoruj* / *refaktoryzacja* / *migracja*) → [workflows.md → Refactor (default)](.cursor/skills/platform-agents/workflows.md#refactor-default). Pick deepest layer first — [by-agent](.cursor/specialists/by-agent.md).
+
+Quick fix / *szybka poprawka* → [Quick fix](.cursor/skills/platform-agents/workflows.md#quick-fix-skip-full-workflow). Not [component-creation.mdc](component-creation.mdc).
+
+Store→Colada or multi-layer → [agent-orchestration.mdc](agent-orchestration.mdc).
