@@ -1,6 +1,8 @@
 # Agent routing — which file to read
 
-One screen — pick **one** row in §1, then follow links **only along that chain**. Do not read every file below.
+**Token budget wins.** You already have [conventions.md](../cache/conventions.md). Do not open `workflows.md`, `stack-profile.md`, or `platform-agents/SKILL.md` unless one row below has no matching skill. Do not read `.agents/skills/**`, review, or perf unless the user asked or the task is Substantial.
+
+One screen — pick **one** row in §1, then read **one** domain skill. Do not read every file below.
 
 **Stop rules:** Quick fix → implement → **stop** (no review, no supplementary). Review-only / perf-only → one audit SKILL → **stop**.
 
@@ -18,15 +20,19 @@ One screen — pick **one** row in §1, then follow links **only along that chai
 
 ## 2. After each domain agent pass
 
+Skip this section on Simple and Standard work. The conventions cache is enough.
+
 | Layer changed | Classify | Map |
 | ------------- | -------- | --- |
-| `.vue` component | [vue-tier.md](vue-tier.md) | Simple → skip supplementary |
-| `/uiapi` backend | [backend-tier.md](backend-tier.md) | Simple → skip supplementary |
-| router / store / Colada / grid | [by-agent.md](by-agent.md) | optional supplementary |
+| `.vue` component | [vue-tier.md](vue-tier.md) | Simple and Standard → skip supplementary |
+| `/uiapi` backend | [backend-tier.md](backend-tier.md) | Simple and Standard → skip supplementary |
+| router / store / Colada / grid | [by-agent.md](by-agent.md) | supplementary only when blocked |
 
-Open [skill card](skills/README.md) → read `.agents/skills/{name}/SKILL.md` → only **active** refs in [stack-profile.md](../stack-profile.md).
+Open a [skill card](skills/README.md) only for **Substantial** work, then one active reference — not the whole `.agents/skills` tree.
 
-## 3. End of feature work (not Quick fix)
+## 3. End of feature work
+
+Skip review and perf unless the user asked, or the task is Substantial.
 
 1. [platform-review-agent](../skills/platform-review-agent/SKILL.md)
 2. [platform-performance-agent](../skills/platform-performance-agent/SKILL.md) if UI/reactivity — [when to add perf audit](../skills/platform-agents/workflows.md#when-to-add-perf-audit)

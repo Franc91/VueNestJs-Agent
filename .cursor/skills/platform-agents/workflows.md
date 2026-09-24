@@ -44,7 +44,7 @@ Run only layers the feature needs — **do not** run backend/grid/router agents 
 
 Map: [by-agent.md](../../specialists/by-agent.md).
 
-**Always** end with `platform-review-agent` (except [Quick fix](#quick-fix-skip-full-workflow)). Add `platform-performance-agent` per [When to add perf audit](#when-to-add-perf-audit).
+Skip `platform-review-agent` and `platform-performance-agent` unless the user asked or the task is Substantial.
 
 ## Refactor (default)
 
@@ -75,7 +75,7 @@ Start with the **deepest layer** being changed, then move up to UI. Use [bugfix.
 
 **Editing existing files:** match neighbouring code in untouched areas (`general.mdc`). Apply latest patterns only to code you are actively refactoring — no drive-by legacy rewrites.
 
-**Always** end with `platform-review-agent` (except [Quick fix](#quick-fix-skip-full-workflow)). Add `platform-performance-agent` per [When to add perf audit](#when-to-add-perf-audit).
+Skip `platform-review-agent` and `platform-performance-agent` unless the user asked or the task is Substantial.
 
 Does **not** apply to: bugfix with a single obvious cause (use [bugfix.md](bugfix.md)) — unless the user explicitly asked to refactor.
 

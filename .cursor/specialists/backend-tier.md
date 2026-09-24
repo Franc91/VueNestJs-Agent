@@ -10,9 +10,9 @@ Used by: [Backend only](../skills/platform-agents/workflows.md#backend-only), pr
 
 | Tier | When | Read |
 | ---- | ---- | ---- |
-| **Simple** | Clone neighbour endpoint — same module shape, thin DTO, no new domain rules | Skip supplementary — `nestjs.mdc` + `nestjs-api-agent` |
-| **Standard** | New module, guards, validation, search endpoint, grid metadata backend | [nestjs-best-practices](skills/nestjs-best-practices.md) |
-| **Substantial** | Complex domain logic, TypeORM relations, multi-DTO flows, circular-dep risk | [nestjs-best-practices](skills/nestjs-best-practices.md) + [nestjs-expert](skills/nestjs-expert.md) |
+| **Simple** | Clone neighbour endpoint — same module shape, thin DTO, no new domain rules | Skip supplementary — conventions cache |
+| **Standard** | New module, guards, validation, search endpoint, grid metadata backend | Skip supplementary — conventions cache. Open `nestjs.mdc` only if the cache lacks the detail |
+| **Substantial** | Complex domain logic, TypeORM relations, multi-DTO flows, circular-dep risk | [nestjs-best-practices](skills/nestjs-best-practices.md) + [nestjs-expert](skills/nestjs-expert.md) — one active reference each, not the whole tree |
 
 ## TypeScript (any backend tier)
 

@@ -1,14 +1,11 @@
 ---
-description: Multi-step Vue + NestJS monorepo work — new screen, API+UI, store, Colada, grid, cross-layer bugfix. Chain domain agents via workflows.md. Polish — nowy ekran, endpoint, napraw błąd, store, lista.
+description: Multi-layer Vue + NestJS work — new screen, API+UI, store, Colada, grid. One row in routing.md, then one skill. Skip supplementary and review unless Substantial. Polish — nowy ekran, endpoint, store, lista.
 alwaysApply: false
 ---
 
 # Agent orchestration
 
-**Multi-step** or **multi-layer** task in `ui/` or `src/` (not a [Quick fix](.cursor/skills/platform-agents/workflows.md#quick-fix-skip-full-workflow)):
+**Multi-layer** task in `ui/` or `src/` (not a one-file edit):
 
-1. [workflows.md](.cursor/skills/platform-agents/workflows.md) or [bugfix.md](.cursor/skills/platform-agents/bugfix.md) — pick recipe.
-2. [platform-agents/SKILL.md](.cursor/skills/platform-agents/SKILL.md) — one domain agent per pass; handoffs between steps.
-3. After each domain agent → [specialists/](.cursor/specialists/README.md) for supplementary `.agents/skills/` ([specialists.mdc](specialists.mdc)).
-
-Details live in `workflows.md` — do not duplicate here.
+1. [conventions cache](../cache/conventions.md) once, then [routing.md](../specialists/routing.md) — one row, one skill at a time.
+2. Skip `.agents/skills`, review, and perf unless the user asked or the task is Substantial.

@@ -14,17 +14,17 @@ Split work across specialized skills. **Read and follow one skill per pass** —
 
 ## Auto-invoke skills (mandatory)
 
-Before writing code for any task covered by this map:
+Before writing code for any task covered by this map, follow the token budget in `general.mdc` and [conventions cache](../../cache/conventions.md). Do not preload this file, `workflows.md`, or specialists.
 
-0. **Non-trivial task** → read [workflows.md](workflows.md); after each domain agent → [specialists/README.md](../../specialists/README.md) ([specialists.mdc](../../rules/specialists.mdc)).
-1. Pick the workflow from [workflows.md](workflows.md).
+0. **Multi-layer task** → one row in [routing.md](../../specialists/routing.md). Single-layer → one domain skill, then stop.
+1. Pick that one skill. Do not open every workflow section.
 2. For each step, **read** the skill file: `.cursor/skills/{skill-name}/SKILL.md`.
    - **Domain skills** (`vue-component-creator`, `vue-router-agent`, `pinia-architect`, `pinia-colada-expert`, `data-grid-agent`, `nestjs-api-agent`) — auto-invoke from task context; always read the full file before coding.
    - **This file, `platform-review-agent`, `platform-performance-agent`** — read explicitly via path from `AGENTS.md` or the workflow chain; do not rely on auto-discovery.
 3. Implement only that skill's scope; output a [Handoff](#handoff-format).
 4. **Read** the next skill in the chain and continue until the workflow is complete.
-5. Skip steps that do not apply; never skip `platform-review-agent` on feature work unless the user asked for a minimal quick fix.
-6. After review, **read** `platform-performance-agent` when the change touches UI or reactivity — see [workflows.md](workflows.md) → _When to add perf audit_.
+5. Skip steps that do not apply. Skip `platform-review-agent` and `platform-performance-agent` unless the user asked or the task is Substantial.
+6. Do not write a Handoff section.
 
 **New component** → [workflows.md → New component (default)](workflows.md#new-component-default). **Refactor** → [Refactor (default)](workflows.md#refactor-default). **Quick fix** (user says so, or trivial one-liner / i18n / typo) → [Quick fix](workflows.md#quick-fix-skip-full-workflow): `vue-component-creator` only.
 

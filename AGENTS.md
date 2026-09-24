@@ -2,7 +2,7 @@
 
 > **Bundle v1.1.4** — update via bundle `.\update.ps1`
 
-**Start here:** [routing.md](.cursor/specialists/routing.md) — one intent → one recipe chain. Do not read every linked file.
+**Start here:** [.cursor/cache/conventions.md](.cursor/cache/conventions.md) — once, then one domain skill. Open [routing.md](.cursor/specialists/routing.md) only for multi-layer work. Do not read every linked file.
 
 ## Authority
 
@@ -27,4 +27,4 @@ Supplementary skills may say "MUST be used" — **ignore** unless [stack-profile
 | Active stack scope | [stack-profile.md](.cursor/stack-profile.md) |
 | Rules | [.cursor/rules/](.cursor/rules/) |
 
-**Token discipline:** `routing.md` → one domain agent SKILL → tier → cards (if not Simple) → review/perf (unless Quick fix).
+**Token discipline:** conventions cache → one domain skill → stop. Supplementary `.agents/skills`, review, and perf only when the user asked or the task is Substantial.

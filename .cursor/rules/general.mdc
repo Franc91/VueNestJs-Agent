@@ -32,8 +32,10 @@ Rules win over legacy code for **new** work. Layer-specific norms: `.cursor/rule
 
 - Never commit, push, or amend unless the user explicitly asks.
 
-## Agent routing
+## Token budget
 
-Pick **one** branch — do not preload every workflow doc: **[routing.md](../specialists/routing.md)**.
+Read [conventions cache](../cache/conventions.md) once, then **one** domain skill. Do not open `stack-profile.md`, `reference.md`, `workflows.md`, or `platform-agents/SKILL.md` unless the cache has no row for the task.
 
-Quick fix (*szybka poprawka* / *bez review*): [workflows → Quick fix](../skills/platform-agents/workflows.md#quick-fix-skip-full-workflow) — `vue-component-creator` only. Full index when needed: [AGENTS.md](../../AGENTS.md) · [skills/README.md](../skills/README.md).
+Do not read `.agents/skills/**`, `platform-review-agent`, or `platform-performance-agent` unless the user asked or the task is Substantial. No Handoff write-up.
+
+Quick fix (*szybka poprawka* / *bez review*): match the open file and stop. Multi-layer only: [routing.md](../specialists/routing.md) — one row.

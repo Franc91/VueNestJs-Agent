@@ -1,5 +1,5 @@
 ---
-description: After a domain agent pass, read supplementary skills from .agents/skills per tier — Vue, NestJS, TypeScript. Polish — supplementary, specjalista, vue-best-practices, nestjs-expert.
+description: Supplementary .agents/skills — only for Substantial tier or a framework gotcha. Skip on Simple and Standard. Polish — supplementary, specjalista.
 alwaysApply: false
 ---
 
@@ -7,6 +7,6 @@ alwaysApply: false
 
 Specialist **content** lives in `.agents/skills/` (third-party, `npx skills add`).
 
-**When to read which** → [.cursor/specialists/routing.md](../specialists/routing.md) or [README.md](../specialists/README.md) — classify [Vue](../specialists/vue-tier.md) / [backend](../specialists/backend-tier.md) tier, then open only the listed `.agents/skills/{name}/SKILL.md` files ([by-agent](../specialists/by-agent.md), [skill cards](../specialists/skills/README.md)). Bugfix: [bugfix.md](../skills/platform-agents/bugfix.md) ([bugfix.mdc](bugfix.mdc)).
+Skip on Simple and Standard. For Substantial work only: [vue-tier.md](../specialists/vue-tier.md) or [backend-tier.md](../specialists/backend-tier.md), then one active reference from the skill card — not the whole `.agents/skills` tree.
 
 Not a domain agent — do not add a handoff for “specialists”; continue the workflow chain after reading.

@@ -10,9 +10,9 @@ Used by: [New component](../skills/platform-agents/workflows.md#new-component-de
 
 | Tier | When | Read |
 | ---- | ---- | ---- |
-| **Simple** | Presentational only — props in, events out; no store, Colada, complex forms, or custom composables | Skip supplementary — `vue.mdc` + `vue-component-creator` |
-| **Standard** | Typical feature component — forms, store consumption, `defineModel`, moderate template logic | [vue-best-practices](skills/vue-best-practices.md) |
-| **Substantial** | Complex composables, heavy TypeScript, architecture decisions, performance-sensitive lists | [vue-best-practices](skills/vue-best-practices.md) + [vue](skills/vue.md) + [vue-expert](skills/vue-expert.md) |
+| **Simple** | Presentational only — props in, events out; no store, Colada, complex forms, or custom composables | Skip supplementary — conventions cache |
+| **Standard** | Typical feature component — forms, store consumption, `defineModel`, moderate template logic | Skip supplementary — conventions cache. Open `vue.mdc` only if the cache lacks the detail |
+| **Substantial** | Complex composables, heavy TypeScript, architecture decisions, performance-sensitive lists | [vue-best-practices](skills/vue-best-practices.md) + [vue](skills/vue.md) + [vue-expert](skills/vue-expert.md) — one active reference each, not the whole tree |
 
 ## Examples
 
