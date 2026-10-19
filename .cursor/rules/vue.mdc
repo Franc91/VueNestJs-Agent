@@ -244,6 +244,59 @@ useEventListener(window, 'keydown', (event) => {
 
 ---
 
+## Playwright targets
+
+New or edited interactive controls must be targetable without translated text, CSS classes, or nth-child. Also expose an accessible name and a role so `getByRole` works.
+
+Token: `{feature}-{control}` in English kebab-case (`enquiry-save`, `customer-email`). Same token on every test attribute below. Include a stable record id in repeated rows (`enquiry-row-${id}`), never the row index.
+
+| Control | Attribute | Why |
+| ------- | --------- | --- |
+| `v-btn`, `router-link`, clickable list item | `data-testid` | Root node is the element Playwright clicks. Role is already `button` or `link` — do not add `role` again |
+| `v-text-field`, `v-textarea`, `v-select`, `v-autocomplete`, `v-checkbox`, `v-radio`, `v-file-input` | `id` and `data-testid` | Vuetify puts `id` on the inner input, so `locator('#customer-email').fill()` hits the control. `data-testid` marks the field wrapper. `:label` is the accessible name |
+| Dialog / `CustomModal` | `data-testid` on the dialog content | Scope later queries with `getByTestId` |
+
+Do not put these on layout-only nodes (`v-row`, `v-col`, decorative icons). On a one-line edit, add them only to controls you create or change.
+
+### ARIA and role
+
+Prefer a Vuetify or native control that already has a role (`v-btn`, `router-link`, inputs). Add `role` only when the node would otherwise be a generic `div` or `span`.
+
+| Case | Add |
+| ---- | --- |
+| Icon-only button (no visible text) | `:aria-label="t('actions.save')"` — accessible name must go through `t()`, not a hardcoded string |
+| Clickable `div` / `span` / icon that is not a `v-btn` | `role="button"`, `tabindex="0"`, Enter and Space do the same action as click, plus `:aria-label` when there is no visible text |
+| Custom dialog that does not come from `v-dialog` / `CustomModal` | `role="dialog"`, `aria-modal="true"`, `aria-labelledby` pointing at the title `id` |
+| Panel, menu, or disclosure that Vuetify does not already label | `aria-expanded` and `aria-controls` bound to the open state and the panel `id` |
+| Field with no visible `:label` | `:aria-label="t('...')"`. Do not add `aria-label` when `:label` is already set |
+| Error text that is not a Vuetify `:rules` / `:messages` | `aria-invalid` and `aria-describedby` pointing at the error element `id` |
+
+Do not set `role` on `v-btn`, `a`, `input`, `textarea`, or `select`. Vuetify and the browser already expose it; a second role breaks `getByRole`.
+
+```vue
+<v-btn data-testid="enquiry-save" @click="save">{{ t('actions.save') }}</v-btn>
+
+<v-btn
+  data-testid="enquiry-close"
+  icon="mdi-close"
+  :aria-label="t('actions.close')"
+  @click="close"
+/>
+
+<v-text-field
+  id="enquiry-name"
+  data-testid="enquiry-name"
+  :label="t('name')"
+  variant="underlined"
+  color="#48a0cc"
+  class="font-size-input input-style"
+/>
+```
+
+Playwright: `getByRole('button', { name })` when the accessible name is visible or an `aria-label`; `getByTestId('enquiry-save')` when the name is translated; `locator('#enquiry-name')` to fill a Vuetify field.
+
+---
+
 ## Before finishing
 
 - [ ] `<script setup lang="ts">`, typed props/emits, props destructured from `defineProps`
@@ -253,3 +306,4 @@ useEventListener(window, 'keydown', (event) => {
 - [ ] Browser/DOM utilities use VueUse when available
 - [ ] In-app navigation uses Vue Router (`useRouter` / `useRoute`, `RouterName` / `RouterPathEnum`)
 - [ ] Shared logic in `composables/` and exported from `index.ts` — single-use logic stays in the SFC
+- [ ] New or edited interactive controls have a Playwright target (`data-testid`, and `id` on Vuetify fields), an accessible name, and a role (explicit only when the element is not already a button, link, or input) — see _Playwright targets_

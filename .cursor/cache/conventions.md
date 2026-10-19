@@ -40,6 +40,8 @@ Navigation: `useRouter` / `useRoute`, named routes via `RouterName`. Do not hard
 
 Vuetify forms in this project usually use `variant="underlined"`, `color="#48a0cc"`, `class="font-size-input input-style"`, `v-form` + `useCheckValidation`. Match the file you are editing when it already differs. Code and comments in English.
 
+Playwright: every interactive control you add or edit gets `data-testid="{feature}-{control}"` (English kebab-case, not translated text or the row index). `v-btn` and links: `data-testid` on the component. Vuetify fields (`v-text-field`, `v-select`, `v-checkbox`, and the other inputs): the same token as `id` and `data-testid` — Vuetify puts `id` on the inner input, so `locator('#customer-email')` can fill it. Accessible name comes from `:label` or, for an icon-only button, `:aria-label="t('...')"`. Add `role` only when the node is not already a button, link, or input (`role="button"` with `tabindex="0"` on a clickable div). Do not set `role` on `v-btn` or native controls. Custom dialogs that are not `v-dialog` / `CustomModal` get `role="dialog"`, `aria-modal="true"`, and `aria-labelledby`. Skip layout-only nodes. Detail: `vue.mdc` → Playwright targets.
+
 ## Nest (new code)
 
 Thin controller in `src/ui-api/{domain}/`, logic in `src/domain/{domain}/`. `@Controller('/uiapi/...')`, `@UseGuards(CognitoAuthGuard)`, default exports. DTOs in `dto/` with `class-validator` and `ValidationGroup`. Register the module in `src/ui-api/ui-api.module.ts`. New frontend paths go in `api.enum.ts`. Search lists use `FilterParams` and `GridService` — open `data-grid.mdc` only for grid work.

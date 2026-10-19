@@ -64,6 +64,7 @@ Ask questions first.
 - [ ] Form validation via `v-form` + `useCheckValidation` where applicable
 - [ ] VueUse preferred over manual DOM event listeners in new code
 - [ ] Navigation uses Vue Router (`useRouter`, `RouterName`) — no hardcoded paths or `window.location`
+- [ ] New or edited interactive controls have `data-testid`; Vuetify fields also use that token as `id`; accessible name via label or `aria-label`; `role` only when the element is not already a button, link, or input (`vue.mdc` → Playwright targets)
 - [ ] Route params read from `useRoute()`; param changes handled with `watch`, not only `onMounted`
 - [ ] New routes have enum entries; permissions via `meta`, guards in `router/index.ts`
 - [ ] List screens use `DataGrid`/`TreeDataGrid` with `UiApiGridUrlPathEnum` — see `data-grid.mdc`

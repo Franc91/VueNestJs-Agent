@@ -35,6 +35,7 @@ Ask questions first.
 10. In-app navigation: **`useRouter`** / **`useRoute`**, **`RouterName`** — see `vue.mdc`; hand off new routes to `vue-router-agent`.
 11. Remove `console.log`, `debugger`, and dead code before finishing.
 12. **Do not extract a composable** when creating or refactoring a component if the logic is used only inside that component — keep it in `<script setup>`; extract to `composables/` only when two or more consumers need it (see `vue.mdc` → _Do not extract single-use logic_).
+13. **Playwright targets** on interactive controls you add or edit — `data-testid="{feature}-{control}"`. Vuetify fields also get the same token as `id` (it lands on the inner input). Add `aria-*` for the accessible name, and `role` only when the node is not already a button, link, or input. See `vue.mdc` → _Playwright targets_.
 
 ## File layout (actual)
 
@@ -99,6 +100,7 @@ const title = computed(() => t('actions.filter', 2));
 - **Validation rules:** `useRules()` from `vuetify/labs/rules` where the file already uses it
 - **Primary actions:** `class="font-weight-bold text-uppercase btn-default bg-gradient-primary …"`
 - **Icons:** MDI — `icon="mdi-..."` or `<v-icon icon="mdi-..." />`
+- **Playwright:** `data-testid="enquiry-save"` on `v-btn`. On fields, `id` and `data-testid` share the token (`enquiry-name`) so `locator('#enquiry-name')` fills the inner input. Icon-only buttons get `:aria-label="t('...')"`. Add `role` only on a clickable non-control (`role="button"` plus `tabindex="0"`). Do not set `role` on `v-btn`, links, or inputs. No test ids on layout-only nodes. Full rule: `vue.mdc` → _Playwright targets_.
 
 ## Colada in components
 
@@ -148,3 +150,4 @@ Project rules in `vue.mdc` and this skill take precedence over generic Vue advic
 - [ ] Shared logic in `composables/` and exported from `index.ts` — do not create a composable for logic used by one component only
 - [ ] Props wired through parent → child when needed
 - [ ] Matches domain folder conventions
+- [ ] Interactive controls added or edited have `data-testid`; Vuetify fields also have the same `id`; accessible name via label or `aria-label`; `role` only if the element is not already a button, link, or input
