@@ -12,29 +12,9 @@ if (-not (Test-Path $TargetPath)) {
     Write-Error "Target path not found: $TargetPath"
 }
 
-Write-Host "Installing agent setup to: $TargetPath"
-
-$mcpTarget = Join-Path $TargetPath ".cursor\mcp.json"
-$mcpBackup = $null
-if (Test-Path $mcpTarget) {
-    $mcpBackup = Get-Content $mcpTarget -Raw -Encoding UTF8
-    Write-Host "Preserving existing .cursor/mcp.json"
-}
-
-$targetCursor = Join-Path $TargetPath ".cursor"
-if (Test-Path $targetCursor) {
-    Remove-Item -Recurse -Force $targetCursor
-}
-
-Copy-Item -Recurse -Force (Join-Path $Root ".cursor") $targetCursor
-Copy-Item -Force (Join-Path $Root "AGENTS.md") (Join-Path $TargetPath "AGENTS.md")
-Copy-Item -Force (Join-Path $Root "skills-lock.json") (Join-Path $TargetPath "skills-lock.json")
-
-if ($mcpBackup) {
-    Set-Content -Path $mcpTarget -Value $mcpBackup -Encoding UTF8 -NoNewline
-} elseif (Test-Path (Join-Path $Root "mcp.example.json")) {
-    Copy-Item (Join-Path $Root "mcp.example.json") $mcpTarget
-    Write-Host "Created .cursor/mcp.json from mcp.example.json (configure if needed)."
+node (Join-Path $Root "scripts\sync-cursor.mjs") --target $TargetPath
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
 }
 
 if ($InstallSupplementary) {

@@ -21,28 +21,7 @@ fi
 
 [[ -d "$TARGET" ]] || { echo "Target not found: $TARGET" >&2; exit 1; }
 
-echo "Installing agent setup to: $TARGET"
-
-MCP_TARGET="$TARGET/.cursor/mcp.json"
-MCP_BACKUP=""
-if [[ -f "$MCP_TARGET" ]]; then
-  MCP_BACKUP="$(mktemp)"
-  cp "$MCP_TARGET" "$MCP_BACKUP"
-  echo "Preserving existing .cursor/mcp.json"
-fi
-
-rm -rf "$TARGET/.cursor"
-cp -R "$ROOT/.cursor" "$TARGET/.cursor"
-cp "$ROOT/AGENTS.md" "$TARGET/AGENTS.md"
-cp "$ROOT/skills-lock.json" "$TARGET/skills-lock.json"
-
-if [[ -n "$MCP_BACKUP" ]]; then
-  cp "$MCP_BACKUP" "$MCP_TARGET"
-  rm -f "$MCP_BACKUP"
-elif [[ -f "$ROOT/mcp.example.json" ]]; then
-  cp "$ROOT/mcp.example.json" "$MCP_TARGET"
-  echo "Created .cursor/mcp.json from mcp.example.json"
-fi
+node "$ROOT/scripts/sync-cursor.mjs" --target "$TARGET"
 
 if $INSTALL_SUPP; then
   bash "$ROOT/install-supplementary.sh" "$TARGET"

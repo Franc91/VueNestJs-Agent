@@ -22,7 +22,7 @@ Copy-Item install.config.example.json install.config.json
 
 | Script | Description |
 | ------ | ------------- |
-| `install.ps1` | Install into target workspace (preserves `mcp.json`) |
+| `install.ps1` | Install into target workspace (keeps `mcp.json` and other agents already in `.cursor/`) |
 | `install.ps1 -InstallSupplementary` | + supplementary skills |
 | `doctor.ps1` | Health check + link validator |
 | `update.ps1` | `git pull` + reinstall |
